@@ -7,7 +7,7 @@
     <ProjectGuid>{35BB51BD-F0EA-43CB-BA9B-C4A8EA973879}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>ATCB</RootNamespace>
-    <AssemblyName>Twitchy</AssemblyName>
+    <AssemblyName>AnotherTwitchChatBot</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
