@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATCB.Library.Models.Playlist
+namespace ATCB.Library.Models.Music
 {
     public class SongEnumerator : IEnumerator
     {

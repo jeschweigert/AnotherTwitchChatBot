@@ -1,4 +1,4 @@
-﻿using ATCB.Library.Models.Playlist;
+﻿using ATCB.Library.Models.Twitch;
 using ATCB.Library.Models.WebApi;
 using System;
 using System.Collections.Generic;
@@ -15,16 +15,10 @@ namespace ATCB
     {
         private static readonly string AppDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private static readonly string OAuthUrl = "https://api.twitch.tv/kraken/oauth2/authorize?response_type=code&client_id=r0rcrtf3wfququa8p1nkhsttam2io1&redirect_uri=http%3A%2F%2Fbot.sandhead.stream%2Fapi%2Fclient_auth.php&scope=channel_check_subscription+channel_commercial+channel_editor+channel_feed_edit+channel_feed_read+channel_read+channel_stream+channel_subscriptions+chat_login+collections_edit+communities_edit+communities_moderate+openid+user_blocks_edit+user_blocks_read+user_follows_edit+user_read+user_subscriptions+viewing_activity_read";
-        private static readonly string ClientId = "r0rcrtf3wfququa8p1nkhsttam2io1";
-
-        private static TwitchClient TwitchClient;
-        private static TwitchAPI TwitchApi;
-        private TwitchPubSub TwitchPubSub;
-        private Playlist Playlist;
+        
         private static WebAuthenticator Authenticator;
-
-        private static string AccessToken;
-        private static string Username;
+        private static TwitchChatBot ChatBot;
+        
         private static Guid AppState;
 
         static void Main(string[] args)
@@ -34,21 +28,24 @@ namespace ATCB
             {
                 FirstTimeSetup();
             }
-            else
+            
+            var FileContents = File.ReadAllText($"{AppDirectory}setupcomplete.txt");
+            AppState = Guid.Parse(FileContents);
+
+            Console.WriteLine("Grabbing credentials from database...");
+            ChatBot = new TwitchChatBot(Authenticator, AppState);
+            Console.WriteLine("Connecting to Twitch...");
+            ChatBot.Start();
+            Console.WriteLine("Connected!");
+            Console.WriteLine($"Welcome, {ChatBot.Username}!");
+
+            while (ChatBot.IsConnected)
             {
-                Console.WriteLine("Retrieving access token...");
-                var FileContents = File.ReadAllText($"{AppDirectory}setupcomplete.txt");
-                AppState = Guid.Parse(FileContents);
-                AccessToken = Authenticator.GetAccessTokenByStateAsync(AppState).Result;
-                Console.WriteLine("Access token retrieved!");
+
             }
 
-            Username = Authenticator.GetUsernameFromOAuthAsync(AccessToken).GetAwaiter().GetResult();
-            Console.WriteLine($"Welcome, {Username}!");
-            TwitchApi = new TwitchAPI(ClientId);
-            TwitchClient = new TwitchClient(new ConnectionCredentials(Username, AccessToken));
             Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
 
         private static void FirstTimeSetup()
@@ -62,11 +59,11 @@ namespace ATCB
             {
                 Console.WriteLine("I'll open up the authentication page in your default browser, press any key once you've successfully authenticated.");
                 System.Diagnostics.Process.Start($"{OAuthUrl}&state={AppState.ToString()}");
-                Console.ReadKey();
+                Console.ReadKey(true);
                 Console.WriteLine("Checking for authentication...");
                 try
                 {
-                    AccessToken = Authenticator.GetAccessTokenByStateAsync(AppState).GetAwaiter().GetResult();
+                    var AccessToken = Authenticator.GetAccessTokenByStateAsync(AppState).Result;
                     HasNotAuthenticated = false;
                 }
                 catch (Exception)

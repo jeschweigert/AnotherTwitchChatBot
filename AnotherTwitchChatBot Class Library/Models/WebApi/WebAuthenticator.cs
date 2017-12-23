@@ -27,6 +27,16 @@ namespace ATCB.Library.Models.WebApi
                 throw new Exception("For some reason, we didn't get an access token. Strange.");
         }
 
+        public async Task<string> GetBotAccessTokenByValidStateAsync(Guid state)
+        {
+            var url = $"{baseUrl}retrieve_chatbottoken.php?state={state.ToString()}";
+            var response = await HttpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+                return response.Content.ReadAsStringAsync().Result;
+            else
+                throw new Exception("For some reason, we didn't get an access token. Strange.");
+        }
+
         public async Task<string> GetUsernameFromOAuthAsync(string accessToken)
         {
             var response = await HttpClient.GetAsync($"{baseUrl}retrieve_username.php?oauth={accessToken}");

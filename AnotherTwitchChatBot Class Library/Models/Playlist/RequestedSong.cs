@@ -8,7 +8,7 @@ using YoutubeExplode;
 using YoutubeExplode.Models;
 using YoutubeExplode.Models.MediaStreams;
 
-namespace ATCB.Library.Models.Playlist
+namespace ATCB.Library.Models.Music
 {
     public class RequestedSong : Song
     {

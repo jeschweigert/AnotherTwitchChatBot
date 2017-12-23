@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATCB.Library.Models.Playlist
+namespace ATCB.Library.Models.Music
 {
     public class Playlist : IEnumerable
     {
-        public Queue<RequestedSong> RequestedSongs;
-        public List<PreexistingSong> Songs;
+        private Queue<RequestedSong> RequestedSongs;
+        private List<PreexistingSong> Songs;
         private int current = -1;
 
         /// <summary>
-        /// Initializes a new Playlist`1 object, which regulates both PreexistingSongs and RequestedSongs.
+        /// Initializes a new Playlist object, which regulates both PreexistingSongs and RequestedSongs.
         /// </summary>
         public Playlist()
         {
@@ -56,6 +56,28 @@ namespace ATCB.Library.Models.Playlist
                 current = Songs.Count() - 1;
                 return Songs[current];
             }
+        }
+
+        /// <summary>
+        /// Adds a new song into the song request queue.
+        /// </summary>
+        /// <param name="song">A RequestedSong object.</param>
+        public void Enqueue(Song song)
+        {
+            if (!(song is RequestedSong))
+                throw new ArgumentException($"Song \"{song.Title}\" was not of type RequestedSong.");
+            RequestedSongs.Enqueue(song as RequestedSong);
+        }
+
+        /// <summary>
+        /// Adds a song to the playlist.
+        /// </summary>
+        /// <param name="song">A PreexistingSong object.</param>
+        public void Enlist(Song song)
+        {
+            if (!(song is PreexistingSong))
+                throw new ArgumentException($"Song \"{song.Title}\" was not of type PreexistingSong.");
+            Songs.Add(song as PreexistingSong);
         }
 
         /// <summary>
