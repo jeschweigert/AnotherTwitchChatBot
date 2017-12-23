@@ -58,6 +58,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Giveaway\FollowerGiveaway.cs" />
+    <Compile Include="Models\Giveaway\Giveaway.cs" />
+    <Compile Include="Models\Giveaway\SubscriberGiveaway.cs" />
     <Compile Include="Models\Playlist\PreexistingSong.cs" />
     <Compile Include="Models\Playlist\Song.cs" />
     <Compile Include="Models\Playlist\Playlist.cs" />

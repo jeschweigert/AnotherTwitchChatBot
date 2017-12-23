@@ -13,6 +13,9 @@ namespace ATCB.Library.Models.Playlist
         public List<PreexistingSong> Songs;
         private int current = -1;
 
+        /// <summary>
+        /// Initializes a new Playlist`1 object, which regulates both PreexistingSongs and RequestedSongs.
+        /// </summary>
         public Playlist()
         {
             RequestedSongs = new Queue<RequestedSong>();
