@@ -18,6 +18,7 @@ namespace ATCB.Library.Models.Playlist
         /// The person who requested the song.
         /// </summary>
         public string Requester { get; set; }
+
         /// <summary>
         /// Whether or not the song in question has been downloaded yet.
         /// </summary>
@@ -26,6 +27,9 @@ namespace ATCB.Library.Models.Playlist
         private YoutubeClient youtubeClient;
         private Video Video;
 
+        /// <summary>
+        /// Initializes an empty RequestedSong`1 object.
+        /// </summary>
         public RequestedSong()
         {
             Video = null;
@@ -34,15 +38,17 @@ namespace ATCB.Library.Models.Playlist
             FilePath = null;
             Requester = null;
             IsDownloaded = false;
+            youtubeClient = new YoutubeClient();
         }
         public RequestedSong(string videoId, string requester)
         {
-            Video = tryGetVideo(videoId);
+            Video = TryGetVideo(videoId);
             Title = Video.Title;
             Artist = Video.Author;
             FilePath = null;
             Requester = requester;
             IsDownloaded = false;
+            youtubeClient = new YoutubeClient();
         }
 
         /// <summary>
@@ -76,7 +82,7 @@ namespace ATCB.Library.Models.Playlist
             return true;
         }
 
-        private Video tryGetVideo(string videoId)
+        private Video TryGetVideo(string videoId)
         {
             try
             {

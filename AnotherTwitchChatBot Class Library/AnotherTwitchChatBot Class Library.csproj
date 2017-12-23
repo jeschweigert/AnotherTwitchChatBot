@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ATCB.Library</RootNamespace>
     <AssemblyName>AnotherTwitchChatBot Class Library</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -66,14 +67,18 @@
     <Compile Include="Models\Playlist\Playlist.cs" />
     <Compile Include="Models\Playlist\RequestedSong.cs" />
     <Compile Include="Models\Playlist\SongEnumerator.cs" />
-    <Compile Include="Models\Twitch\AtcbTwitchClient.cs" />
     <Compile Include="Models\Uno\UnoGame.cs" />
     <Compile Include="Models\WebApi\WebAuthenticator.cs" />
     <Compile Include="Models\WebApi\WebSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
