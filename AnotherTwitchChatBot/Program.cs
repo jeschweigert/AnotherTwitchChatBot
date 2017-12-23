@@ -36,13 +36,8 @@ namespace ATCB
             ChatBot = new TwitchChatBot(Authenticator, AppState);
             Console.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
-            Console.WriteLine("Connected!");
-            Console.WriteLine($"Welcome, {ChatBot.Username}!");
 
-            while (ChatBot.IsConnected)
-            {
-
-            }
+            while (ChatBot.IsConnected) { }
 
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey(true);
