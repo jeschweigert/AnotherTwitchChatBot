@@ -19,16 +19,40 @@ namespace ATCB.Library.Models.WebApi
             HttpClient = new HttpClient();
         }
 
+        /// <summary>
+        /// Grabs the relevant access token from the database using a related app state.
+        /// </summary>
+        /// <param name="state">The user's app state.</param>
+        /// <returns>A Twitch access token.</returns>
         public async Task<string> GetAccessTokenByStateAsync(Guid state)
         {
             var url = $"{baseUrl}retrieve_token.php?state={state.ToString()}";
             var response = await HttpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
-                return response.Content.ReadAsStringAsync().Result;
+                return await response.Content.ReadAsStringAsync();
             else
-                throw new Exception("For some reason, we didn't get an access token. Strange.");
+                throw new Exception("Could not obtain access token. Check if state is correct or if database is down.");
         }
 
+        /// <summary>
+        /// Grabs the relevant refresh token from the database using a related app state.
+        /// </summary>
+        /// <param name="state">The user's app state.</param>
+        /// <returns>A Twitch refresh token.</returns>
+        public async Task<string> GetRefreshTokenByStateAsync(Guid state)
+        {
+            var response = await HttpClient.GetAsync($"{baseUrl}retrieve_refreshtoken.php?state={state.ToString()}");
+            if (response.IsSuccessStatusCode)
+                return await response.Content.ReadAsStringAsync();
+            else
+                throw new Exception("Could not obtain refresh token. Check if state is correct or if database is down.");
+        }
+
+        /// <summary>
+        /// Grabs the bot access token from the database using a valid app state.
+        /// </summary>
+        /// <param name="state">Any valid app state.</param>
+        /// <returns>A Twitch access token.</returns>
         public async Task<string> GetBotAccessTokenByValidStateAsync(Guid state)
         {
             var url = $"{baseUrl}retrieve_chatbottoken.php?state={state.ToString()}";
@@ -36,44 +60,37 @@ namespace ATCB.Library.Models.WebApi
             if (response.IsSuccessStatusCode)
                 return response.Content.ReadAsStringAsync().Result;
             else
-                throw new Exception("For some reason, we didn't get an access token. Strange.");
+                throw new Exception("Could not obtain bot access token. Check if state is correct or if database is down.");
         }
 
+        /// <summary>
+        /// Grabs the username of the user through their access token.
+        /// </summary>
+        /// <param name="state">The user's access token.</param>
+        /// <returns>A Twitch username.</returns>
         public async Task<string> GetUsernameFromOAuthAsync(string accessToken)
         {
             var response = await HttpClient.GetAsync($"{baseUrl}retrieve_username.php?oauth={accessToken}");
             if (response.IsSuccessStatusCode)
                 return response.Content.ReadAsStringAsync().Result;
             else
-                throw new Exception("For some reason, we didn't get a username. Strange.");
+                throw new Exception("Could not recieve username from Twitch, token may be expired.");
         }
 
-        public async Task<string> RefreshAccessToken(Guid state, string clientId, string oldAccessToken)
+        public async Task<string> GetClientSecretByValidStateAsync(Guid state)
         {
-            string refreshToken, clientSecret;
-
-            // First, we have to get the refresh token
-            var response = await HttpClient.GetAsync($"{baseUrl}retrieve_refreshtoken.php?state={state.ToString()}");
+            var response = await HttpClient.GetAsync($"{baseUrl}retrieve_clientsecret.php?state={state.ToString()}");
             if (response.IsSuccessStatusCode)
-                refreshToken = await response.Content.ReadAsStringAsync();
+                return await response.Content.ReadAsStringAsync();
             else
-                throw new Exception("For some reason, we didn't get a username. Strange.");
+                throw new Exception("Could not obtain client secret.");
+        }
 
-            // Next, we have to get the client secret
-            response = await HttpClient.GetAsync($"{baseUrl}retrieve_clientsecret.php?state={state.ToString()}");
-            if (response.IsSuccessStatusCode)
-                clientSecret = await response.Content.ReadAsStringAsync();
-            else
-                throw new Exception("For some reason, we didn't get a username. Strange.");
-
-            // Okay, now let's make our POST request to Twitch
-            var twitchApi = new TwitchAPI(clientId);
-            var refreshResponse = await twitchApi.Auth.v5.RefreshAuthTokenAsync(refreshToken, clientSecret, clientId);
-            var url = $"{baseUrl}update_tokens.php?state={state.ToString()}&access={refreshResponse.AccessToken}&refresh={refreshResponse.RefreshToken}";
-            var updateResponse = await HttpClient.GetAsync(url);
+        public async Task UpdateAccessAndRefreshTokens(Guid state, string accessToken, string refreshToken)
+        {
+            var updateResponse = await HttpClient.GetAsync($"{baseUrl}update_tokens.php?state={state.ToString()}&access={accessToken}&refresh={refreshToken}");
             if (!updateResponse.IsSuccessStatusCode)
                 throw new Exception("Unable to update access & refresh tokens in database.");
-            return refreshResponse.AccessToken;
         }
     }
 }

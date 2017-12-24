@@ -40,6 +40,7 @@ namespace ATCB.Library.Models.Twitch
             this.authenticator = authenticator;
             this.appState = appState;
 
+            // Retrieve access tokens and usernames for logging in
             userAccessToken = authenticator.GetAccessTokenByStateAsync(appState).Result;
             botAccessToken = authenticator.GetBotAccessTokenByValidStateAsync(appState).Result;
             Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
@@ -49,13 +50,13 @@ namespace ATCB.Library.Models.Twitch
             if (string.IsNullOrEmpty(Username))
             {
                 Console.WriteLine("Refreshing user access token...");
-                userAccessToken = authenticator.RefreshAccessToken(appState, ClientId, userAccessToken).Result;
+                userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken).Result;
                 Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             }
             if (string.IsNullOrEmpty(botname))
             {
                 Console.WriteLine("Refreshing bot access token...");
-                botAccessToken = authenticator.RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
+                botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
                 botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
 
@@ -65,9 +66,11 @@ namespace ATCB.Library.Models.Twitch
             playlist = new Playlist();
             speechSynthesizer = new SpeechSynthesizer();
 
+            // User client events
             userClient.OnConnected += OnUserConnected;
             userClient.OnBeingHosted += OnUserBeingHosted;
-
+            
+            // Bot client events
             botClient.OnConnected += OnBotConnected;
             botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnMessageSent += OnBotMessageSent;
@@ -95,7 +98,30 @@ namespace ATCB.Library.Models.Twitch
             userClient.Disconnect();
             IsConnected = false;
         }
-        
+
+        /// <summary>
+        /// Refreshes an expired access token and updates the database.
+        /// </summary>
+        /// <param name="state">A user's app state.</param>
+        /// <param name="clientId">The client ID.</param>
+        /// <param name="oldAccessToken">The expired access token.</param>
+        /// <returns>The refreshed access token.</returns>
+        public async Task<string> RefreshAccessToken(Guid state, string clientId, string oldAccessToken)
+        {
+            string refreshToken, clientSecret;
+
+            // First, we have to get the refresh token
+            refreshToken = await authenticator.GetRefreshTokenByStateAsync(state);
+
+            // Next, we have to get the client secret
+            clientSecret = await authenticator.GetClientSecretByValidStateAsync(state);
+
+            // Okay, now let's make our POST request to Twitch
+            var refreshResponse = await twitchApi.Auth.v5.RefreshAuthTokenAsync(refreshToken, clientSecret, clientId);
+            await authenticator.UpdateAccessAndRefreshTokens(state, refreshResponse.AccessToken, refreshResponse.RefreshToken);
+            return refreshResponse.AccessToken;
+        }
+
         #region User Events
 
         private void OnUserConnected(object sender, OnConnectedArgs e)
