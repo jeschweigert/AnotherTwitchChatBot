@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Giveaway\FollowerGiveaway.cs" />
     <Compile Include="Models\Giveaway\Giveaway.cs" />
     <Compile Include="Models\Giveaway\SubscriberGiveaway.cs" />

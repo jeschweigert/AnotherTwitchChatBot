@@ -16,6 +16,7 @@ namespace ATCB.Library.Models.Twitch
     public class TwitchChatBot
     {
         private static readonly string ClientId = "r0rcrtf3wfququa8p1nkhsttam2io1";
+        private static readonly Guid BotState = Guid.Parse("888c0b6f-3354-468f-ad96-a176b1a7849a");
 
         private SpeechSynthesizer speechSynthesizer;
         private TwitchClient botClient, userClient;
@@ -44,8 +45,22 @@ namespace ATCB.Library.Models.Twitch
             Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             var botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
 
-            botClient = new TwitchClient(new ConnectionCredentials(botname, botAccessToken), Username);
+            // If the either of the usernames are blank, then we have to refresh the tokens.
+            if (string.IsNullOrEmpty(Username))
+            {
+                Console.WriteLine("Refreshing user access token...");
+                userAccessToken = authenticator.RefreshAccessToken(appState, ClientId, userAccessToken).Result;
+                Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
+            }
+            if (string.IsNullOrEmpty(botname))
+            {
+                Console.WriteLine("Refreshing bot access token...");
+                botAccessToken = authenticator.RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
+                botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
+            }
+
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
+            botClient = new TwitchClient(new ConnectionCredentials(botname, botAccessToken), Username);
             twitchApi = new TwitchAPI(ClientId, botAccessToken);
             playlist = new Playlist();
             speechSynthesizer = new SpeechSynthesizer();
@@ -56,6 +71,7 @@ namespace ATCB.Library.Models.Twitch
             botClient.OnConnected += OnBotConnected;
             botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnMessageSent += OnBotMessageSent;
+            botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
             botClient.OnReSubscriber += OnReSubscriber;
         }
@@ -104,7 +120,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            Console.WriteLine($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.Username}: {e.ChatMessage.Message}");
+            Console.WriteLine($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
         }
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
@@ -135,6 +151,11 @@ namespace ATCB.Library.Models.Twitch
         {
             speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
             speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
+        }
+
+        private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
+        {
+            
         }
 
         #endregion

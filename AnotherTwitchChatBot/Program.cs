@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TwitchLib;
 using TwitchLib.Models.Client;
@@ -29,6 +30,7 @@ namespace ATCB
                 FirstTimeSetup();
             }
             
+            // TODO: create json/xml settings file instead of this
             var FileContents = File.ReadAllText($"{AppDirectory}setupcomplete.txt");
             AppState = Guid.Parse(FileContents);
 
@@ -53,6 +55,7 @@ namespace ATCB
             while (HasNotAuthenticated)
             {
                 Console.WriteLine("I'll open up the authentication page in your default browser, press any key once you've successfully authenticated.");
+                Thread.Sleep(5000);
                 System.Diagnostics.Process.Start($"{OAuthUrl}&state={AppState.ToString()}");
                 Console.ReadKey(true);
                 Console.WriteLine("Checking for authentication...");
