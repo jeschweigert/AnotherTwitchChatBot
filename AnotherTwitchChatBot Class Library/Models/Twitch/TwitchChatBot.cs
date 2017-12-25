@@ -28,12 +28,13 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
 
         private Playlist playlist;
-        private CommandFactory commandStorage;
+        private CommandFactory commandFactory;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
 
         public string Username { get; private set; }
+        public string Botname { get; private set; }
         public bool IsConnected { get; private set; } = false;
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace ATCB.Library.Models.Twitch
             userAccessToken = authenticator.GetAccessTokenByStateAsync(appState).Result;
             botAccessToken = authenticator.GetBotAccessTokenByValidStateAsync(appState).Result;
             Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
-            var botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
+            Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
 
             // If the either of the usernames are blank, then we have to refresh the tokens.
             if (string.IsNullOrEmpty(Username))
@@ -60,18 +61,18 @@ namespace ATCB.Library.Models.Twitch
                 userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken).Result;
                 Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             }
-            if (string.IsNullOrEmpty(botname))
+            if (string.IsNullOrEmpty(Botname))
             {
                 Colorful.Console.WriteLine("Refreshing bot access token...");
                 botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
-                botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
+                Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
 
             twitchApi.Settings.AccessToken = botAccessToken;
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
-            botClient = new TwitchClient(new ConnectionCredentials(botname, botAccessToken), Username);
+            botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
             playlist = new Playlist();
-            commandStorage = new CommandFactory();
+            commandFactory = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
 
             // User client events
@@ -85,6 +86,7 @@ namespace ATCB.Library.Models.Twitch
             botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
             botClient.OnReSubscriber += OnReSubscriber;
+            botClient.OnConnectionError += OnBotConnectionError;
         }
 
         /// <summary>
@@ -128,6 +130,30 @@ namespace ATCB.Library.Models.Twitch
             var refreshResponse = await twitchApi.Auth.v5.RefreshAuthTokenAsync(refreshToken, clientSecret, clientId);
             await authenticator.UpdateAccessAndRefreshTokens(state, refreshResponse.AccessToken, refreshResponse.RefreshToken);
             return refreshResponse.AccessToken;
+        }
+
+        /// <summary>
+        /// Performs a chat command from the console.
+        /// </summary>
+        /// <param name="consoleCommand">The command sent.</param>
+        public void PerformConsoleCommand(string consoleCommand)
+        {
+            var commandText = consoleCommand.Split(' ')[0].ToLower();
+            Command command = commandFactory.GetCommand(commandText);
+            if (command != null)
+            {
+                var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
+                command.Run(context, botClient);
+            }
+            else
+            {
+                botClient.SendMessage($"Command \"{commandText}\" was not found.");
+            }
+        }
+
+        public void SendMessageIfNotConsole()
+        {
+
         }
 
         #region User Events
@@ -196,7 +222,7 @@ namespace ATCB.Library.Models.Twitch
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
             var commandText = e.Command.CommandText.ToLower();
-            Command command = commandStorage.GetCommand(commandText);
+            Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
                 command.Run(e.Command, botClient);
@@ -205,6 +231,11 @@ namespace ATCB.Library.Models.Twitch
             {
                 botClient.SendMessage($"Command \"{commandText}\" was not found.");
             }
+        }
+
+        private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
+        {
+            Colorful.Console.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
         }
 
         #endregion
