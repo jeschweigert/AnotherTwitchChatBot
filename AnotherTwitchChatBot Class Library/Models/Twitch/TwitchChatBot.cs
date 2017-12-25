@@ -1,6 +1,5 @@
 ﻿using ATCB.Library.Models.Music;
 using ATCB.Library.Models.WebApi;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,19 +9,26 @@ using TwitchLib.Models.Client;
 using TwitchLib.Events.Client;
 using System.Speech.Synthesis;
 using TwitchLib.Enums;
+using Colorful;
+using System.Drawing;
+using System;
+using ATCB.Library.Models.Giveaways;
+using ATCB.Library.Models.Commands;
 
 namespace ATCB.Library.Models.Twitch
 {
     public class TwitchChatBot
     {
         private static readonly string ClientId = "r0rcrtf3wfququa8p1nkhsttam2io1";
-        private static readonly Guid BotState = Guid.Parse("888c0b6f-3354-468f-ad96-a176b1a7849a");
+        private static readonly Guid BotState = Guid.Parse("40b2f73b-9d51-4133-8c27-025a9d31bfcb");
 
         private SpeechSynthesizer speechSynthesizer;
         private TwitchClient botClient, userClient;
         private TwitchAPI twitchApi;
         private WebAuthenticator authenticator;
+
         private Playlist playlist;
+        private CommandStorage commandStorage;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
@@ -39,6 +45,7 @@ namespace ATCB.Library.Models.Twitch
         {
             this.authenticator = authenticator;
             this.appState = appState;
+            twitchApi = new TwitchAPI(ClientId);
 
             // Retrieve access tokens and usernames for logging in
             userAccessToken = authenticator.GetAccessTokenByStateAsync(appState).Result;
@@ -49,21 +56,22 @@ namespace ATCB.Library.Models.Twitch
             // If the either of the usernames are blank, then we have to refresh the tokens.
             if (string.IsNullOrEmpty(Username))
             {
-                Console.WriteLine("Refreshing user access token...");
+                Colorful.Console.WriteLine("Refreshing user access token...");
                 userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken).Result;
                 Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             }
             if (string.IsNullOrEmpty(botname))
             {
-                Console.WriteLine("Refreshing bot access token...");
+                Colorful.Console.WriteLine("Refreshing bot access token...");
                 botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
                 botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
 
+            twitchApi.Settings.AccessToken = botAccessToken;
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(botname, botAccessToken), Username);
-            twitchApi = new TwitchAPI(ClientId, botAccessToken);
             playlist = new Playlist();
+            commandStorage = new CommandStorage();
             speechSynthesizer = new SpeechSynthesizer();
 
             // User client events
@@ -126,7 +134,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnUserConnected(object sender, OnConnectedArgs e)
         {
-            Console.WriteLine($"Hooked into {Username}'s account!");
+            Colorful.Console.WriteLine($"Hooked into {Username}'s account!");
         }
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
@@ -141,17 +149,23 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnBotConnected(object sender, OnConnectedArgs e)
         {
-            Console.WriteLine($"Chat bot user connected to {Username}'s stream!");
+            Colorful.Console.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            Console.WriteLine($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
+            StyleSheet styleSheet = new StyleSheet(Color.White);
+            styleSheet.AddStyle(e.ChatMessage.DisplayName, e.ChatMessage.Color);
+
+            Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
         }
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
         {
-            Console.WriteLine($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}");
+            StyleSheet styleSheet = new StyleSheet(Color.White);
+            styleSheet.AddStyle(e.SentMessage.DisplayName, ColorTranslator.FromHtml(e.SentMessage.ColorHex));
+
+            Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}", styleSheet);
         }
 
         private void OnNewSubscriber(object sender, OnNewSubscriberArgs e)
@@ -181,7 +195,16 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
-            
+            var commandText = e.Command.CommandText.ToLower();
+            Command command = commandStorage.GetCommand(commandText);
+            if (command != null)
+            {
+                command.Run(e.Command, botClient);
+            }
+            else
+            {
+                botClient.SendMessage($"Command \"{commandText}\" was not found.");
+            }
         }
 
         #endregion

@@ -4,19 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATCB.Library.Models.Giveaway
+namespace ATCB.Library.Models.Giveaways
 {
     /// <summary>
     /// An abstract class representing a time-sensitive Twitch chat giveaway.
     /// </summary>
     public abstract class Giveaway
     {
-        public abstract void Start();
+        public abstract bool AllowEntries();
 
-        public abstract bool IsInProgress();
+        public abstract void Start();
 
         public abstract void AddName(string name);
 
-        public abstract void End();
+        public abstract string End();
     }
 }

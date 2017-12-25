@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TwitchLib;
 
-namespace ATCB.Library.Models.Giveaway
+namespace ATCB.Library.Models.Giveaways
 {
     public class FollowerGiveaway : Giveaway
     {
@@ -23,12 +23,12 @@ namespace ATCB.Library.Models.Giveaway
                 RaffleNames.Add(name);
         }
 
-        public override void End()
+        public override bool AllowEntries()
         {
             throw new NotImplementedException();
         }
 
-        public override bool IsInProgress()
+        public override string End()
         {
             throw new NotImplementedException();
         }

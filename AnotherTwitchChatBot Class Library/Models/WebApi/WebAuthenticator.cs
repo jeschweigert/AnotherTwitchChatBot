@@ -30,6 +30,8 @@ namespace ATCB.Library.Models.WebApi
             var response = await HttpClient.GetAsync(url);
             if (response.IsSuccessStatusCode)
                 return await response.Content.ReadAsStringAsync();
+            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                throw new Exception("Could not obtain access token. Check if client secret is valid.");
             else
                 throw new Exception("Could not obtain access token. Check if state is correct or if database is down.");
         }

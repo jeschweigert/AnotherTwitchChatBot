@@ -34,6 +34,9 @@
     <Reference Include="AngleSharp, Version=0.9.9.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
       <HintPath>..\packages\AngleSharp.0.9.9\lib\net45\AngleSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Colorful.Console, Version=1.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Colorful.Console.1.2.1\lib\net461\Colorful.Console.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -42,6 +45,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Speech" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,9 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\Commands\Command.cs" />
-    <Compile Include="Models\Giveaway\FollowerGiveaway.cs" />
-    <Compile Include="Models\Giveaway\Giveaway.cs" />
-    <Compile Include="Models\Giveaway\SubscriberGiveaway.cs" />
+    <Compile Include="Models\Commands\CommandStorage.cs" />
+    <Compile Include="Models\Commands\GiveawayCommand.cs" />
+    <Compile Include="Models\Giveaways\FollowerGiveaway.cs" />
+    <Compile Include="Models\Giveaways\Giveaway.cs" />
+    <Compile Include="Models\Giveaways\SubscriberGiveaway.cs" />
+    <Compile Include="Models\Giveaways\ViewerGiveaway.cs" />
+    <Compile Include="Models\Misc\ReflectiveEnumerator.cs" />
     <Compile Include="Models\Playlist\PreexistingSong.cs" />
     <Compile Include="Models\Playlist\Song.cs" />
     <Compile Include="Models\Playlist\Playlist.cs" />
