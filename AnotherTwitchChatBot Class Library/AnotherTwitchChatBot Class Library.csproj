@@ -64,8 +64,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Commands\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
-    <Compile Include="Models\Commands\CommandStorage.cs" />
+    <Compile Include="Models\Commands\CommandFactory.cs" />
     <Compile Include="Models\Commands\GiveawayCommand.cs" />
     <Compile Include="Models\Giveaways\FollowerGiveaway.cs" />
     <Compile Include="Models\Giveaways\Giveaway.cs" />

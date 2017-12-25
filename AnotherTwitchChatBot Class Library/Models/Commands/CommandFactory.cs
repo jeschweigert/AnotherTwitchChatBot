@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace ATCB.Library.Models.Commands
 {
-    public class CommandStorage
+    public class CommandFactory
     {
         private List<Command> Commands;
 
-        public CommandStorage()
+        public CommandFactory()
         {
             Commands = new List<Command>();
 

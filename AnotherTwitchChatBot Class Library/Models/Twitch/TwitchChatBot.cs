@@ -28,7 +28,7 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
 
         private Playlist playlist;
-        private CommandStorage commandStorage;
+        private CommandFactory commandStorage;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
@@ -71,7 +71,7 @@ namespace ATCB.Library.Models.Twitch
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(botname, botAccessToken), Username);
             playlist = new Playlist();
-            commandStorage = new CommandStorage();
+            commandStorage = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
 
             // User client events

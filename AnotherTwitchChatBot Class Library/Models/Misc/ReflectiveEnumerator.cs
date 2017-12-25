@@ -20,7 +20,6 @@ namespace ATCB.Library.Models.Misc
             {
                 objects.Add((T)Activator.CreateInstance(type, constructorArgs));
             }
-            objects.Sort();
             return objects;
         }
     }
