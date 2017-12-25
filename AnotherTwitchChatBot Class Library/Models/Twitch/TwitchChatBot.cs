@@ -26,8 +26,7 @@ namespace ATCB.Library.Models.Twitch
         private TwitchClient botClient, userClient;
         private TwitchAPI twitchApi;
         private WebAuthenticator authenticator;
-
-        private Playlist playlist;
+        
         private CommandFactory commandFactory;
 
         private Guid appState;
@@ -71,7 +70,6 @@ namespace ATCB.Library.Models.Twitch
             twitchApi.Settings.AccessToken = botAccessToken;
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
-            playlist = new Playlist();
             commandFactory = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
 
@@ -81,12 +79,12 @@ namespace ATCB.Library.Models.Twitch
             
             // Bot client events
             botClient.OnConnected += OnBotConnected;
+            botClient.OnConnectionError += OnBotConnectionError;
             botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnMessageSent += OnBotMessageSent;
             botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
             botClient.OnReSubscriber += OnReSubscriber;
-            botClient.OnConnectionError += OnBotConnectionError;
         }
 
         /// <summary>
@@ -178,12 +176,20 @@ namespace ATCB.Library.Models.Twitch
             Colorful.Console.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
+        private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
+        {
+            Colorful.Console.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
+        }
+
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             StyleSheet styleSheet = new StyleSheet(Color.White);
             styleSheet.AddStyle(e.ChatMessage.DisplayName, e.ChatMessage.Color);
 
             Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
+
+            if (e.ChatMessage.Bits > 0)
+                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
         }
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
@@ -231,11 +237,6 @@ namespace ATCB.Library.Models.Twitch
             {
                 botClient.SendMessage($"Command \"{commandText}\" was not found.");
             }
-        }
-
-        private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
-        {
-            Colorful.Console.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
         }
 
         #endregion

@@ -1,8 +1,13 @@
-﻿using System;
+﻿using ATCB.Library.Models.Misc;
+using NAudio.Wave;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ATCB.Library.Models.Music
@@ -11,6 +16,8 @@ namespace ATCB.Library.Models.Music
     {
         private Queue<RequestedSong> RequestedSongs;
         private List<PreexistingSong> Songs;
+        private IWavePlayer waveOutDevice;
+        private WaveStream audioFileReader;
         private int current = -1;
 
         /// <summary>
@@ -20,6 +27,19 @@ namespace ATCB.Library.Models.Music
         {
             RequestedSongs = new Queue<RequestedSong>();
             Songs = new List<PreexistingSong>();
+            waveOutDevice = new WaveOutEvent();
+            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
+        }
+
+        public void LoadFromFolder(string filePath)
+        {
+            DirectoryInfo d = new DirectoryInfo(filePath);
+            TagLib.File metadata;
+            foreach (var file in d.GetFiles())
+            {
+                metadata = TagLib.File.Create(file.FullName);
+                Enlist(new PreexistingSong(metadata.Tag.Title, metadata.Tag.JoinedPerformers, file.FullName));
+            }
         }
 
         /// <summary>
@@ -81,9 +101,61 @@ namespace ATCB.Library.Models.Music
         }
 
         /// <summary>
+        /// Shuffles the songs currently in the playlist, not including song requests.
+        /// </summary>
+        public void Shuffle()
+        {
+            Random r = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId));
+            int n = Songs.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = r.Next(n + 1);
+                PreexistingSong temp = Songs[k];
+                Songs[k] = Songs[n];
+                Songs[n] = temp;
+            }
+        }
+
+        /// <summary>
+        /// Plays the playlist.
+        /// </summary>
+        public void Play()
+        {
+            var song = GetNext();
+            audioFileReader = new MediaFoundationReader(song.FilePath);
+            waveOutDevice.Init(audioFileReader);
+            waveOutDevice.Play();
+            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+        }
+
+        /// <summary>
+        /// Skips to the next song.
+        /// </summary>
+        public void Skip()
+        {
+            waveOutDevice.Stop();
+            while (waveOutDevice.PlaybackState != PlaybackState.Stopped) { }
+        }
+
+        private void PlayNext()
+        {
+            waveOutDevice.Stop();
+            waveOutDevice.Dispose();
+            audioFileReader.Dispose();
+
+            var song = GetNext();
+            waveOutDevice = new WaveOutEvent();
+            audioFileReader = new MediaFoundationReader(song.FilePath);
+            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
+            waveOutDevice.Init(audioFileReader);
+            waveOutDevice.Play();
+            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+        }
+
+        /// <summary>
         /// Starts downloading the next requested song in queue.
         /// </summary>
-        /// <returns></returns>
         public async Task DownloadNextInQueueAsync()
         {
             if (!RequestedSongs.Peek().IsDownloaded)

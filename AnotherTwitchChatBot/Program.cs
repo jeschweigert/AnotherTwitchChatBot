@@ -1,4 +1,6 @@
-﻿using ATCB.Library.Models.Twitch;
+﻿using ATCB.Library.Models.Misc;
+using ATCB.Library.Models.Music;
+using ATCB.Library.Models.Twitch;
 using ATCB.Library.Models.WebApi;
 using Colorful;
 using System;
@@ -41,6 +43,12 @@ namespace ATCB
             Colorful.Console.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
 
+            // TODO: make playlists great again
+            Colorful.Console.WriteLine("Attempting to load the playlist...");
+            GlobalVariables.GlobalPlaylist.LoadFromFolder("C:/Users/rocki/OneDrive/Music/STREM III");
+            GlobalVariables.GlobalPlaylist.Shuffle();
+            GlobalVariables.GlobalPlaylist.Play();
+
             object locker = new object();
             List<char> charBuffer = new List<char>();
 
@@ -48,13 +56,16 @@ namespace ATCB
                 var key = Colorful.Console.ReadKey();
                 if (key.Key == ConsoleKey.Enter && charBuffer.Count > 0)
                 {
-                    StyleSheet styleSheet = new StyleSheet(Color.White);
-                    styleSheet.AddStyle("Console", Color.Gray);
-                    var sentMessage = new string(charBuffer.ToArray());
+                    lock (locker)
+                    {
+                        StyleSheet styleSheet = new StyleSheet(Color.White);
+                        styleSheet.AddStyle("Console", Color.Gray);
+                        var sentMessage = new string(charBuffer.ToArray());
 
-                    Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: {sentMessage}", styleSheet);
-                    ChatBot.PerformConsoleCommand(sentMessage);
-                    charBuffer.Clear();
+                        Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: {sentMessage}", styleSheet);
+                        ChatBot.PerformConsoleCommand(sentMessage);
+                        charBuffer.Clear();
+                    }
                 }
                 else if (key.Key == ConsoleKey.Backspace && charBuffer.Count > 0)
                 {
