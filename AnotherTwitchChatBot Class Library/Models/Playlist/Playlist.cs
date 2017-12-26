@@ -29,8 +29,18 @@ namespace ATCB.Library.Models.Music
             Songs = new List<PreexistingSong>();
             waveOutDevice = new WaveOutEvent();
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
+            Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/downloads");
         }
 
+        /// <summary>
+        /// The number of songs currently in the request queue.
+        /// </summary>
+        public int RequestedSongCount => RequestedSongs.Count;
+
+        /// <summary>
+        /// Gets all media files in a folder and adds them to the playlist.
+        /// </summary>
+        /// <param name="filePath">The path to the folder.</param>
         public void LoadFromFolder(string filePath)
         {
             DirectoryInfo d = new DirectoryInfo(filePath);
@@ -87,6 +97,8 @@ namespace ATCB.Library.Models.Music
             if (!(song is RequestedSong))
                 throw new ArgumentException($"Song \"{song.Title}\" was not of type RequestedSong.");
             RequestedSongs.Enqueue(song as RequestedSong);
+            if (RequestedSongs.Count == 1)
+                DownloadNextInQueueAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>

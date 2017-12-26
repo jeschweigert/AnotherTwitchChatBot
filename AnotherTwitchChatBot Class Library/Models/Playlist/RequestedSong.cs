@@ -32,23 +32,23 @@ namespace ATCB.Library.Models.Music
         /// </summary>
         public RequestedSong()
         {
+            youtubeClient = new YoutubeClient();
             Video = null;
             Title = null;
             Artist = null;
             FilePath = null;
             Requester = null;
             IsDownloaded = false;
-            youtubeClient = new YoutubeClient();
         }
         public RequestedSong(string videoId, string requester)
         {
+            youtubeClient = new YoutubeClient();
             Video = TryGetVideo(videoId);
             Title = Video.Title;
             Artist = Video.Author;
             FilePath = null;
             Requester = requester;
             IsDownloaded = false;
-            youtubeClient = new YoutubeClient();
         }
 
         /// <summary>

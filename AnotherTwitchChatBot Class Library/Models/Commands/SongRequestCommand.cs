@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ATCB.Library.Models.Misc;
+using ATCB.Library.Models.Music;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,11 +25,21 @@ namespace ATCB.Library.Models.Commands
 
         public override void Run(ChatCommand context, TwitchClient client)
         {
-            /*if (context.ArgumentsAsList.Count < 1)
+            string videoId = "";
+            if (context.ArgumentsAsList.Count < 1)
             {
-
-            }*/
-            client.SendMessage("Sorry, song requests aren't implemented yet! ");
+                throw new Exception("Invalid parameters");
+            }
+            else if (context.ArgumentsAsList.Count > 1 || YoutubeClient.TryParseVideoId(context.ArgumentsAsList[0], out videoId) == false)
+            {
+                client.SendMessage("Sorry! Requesting songs by query doesn't quite work yet, but requesting by URL does!");
+            }
+            if (!string.IsNullOrEmpty(videoId))
+            {
+                var video = this.client.GetVideoAsync(videoId).Result;
+                client.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{video.Title}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
+                GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(videoId, context.ChatMessage.DisplayName));
+            }
         }
     }
 }
