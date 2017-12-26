@@ -126,6 +126,8 @@
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
     <Compile Include="Models\Commands\GiveawayCommand.cs" />
+    <Compile Include="Models\Commands\PlayCommand.cs" />
+    <Compile Include="Models\Commands\PauseCommand.cs" />
     <Compile Include="Models\Commands\SkipCommand.cs" />
     <Compile Include="Models\Commands\SongRequestCommand.cs" />
     <Compile Include="Models\Giveaways\FollowerGiveaway.cs" />

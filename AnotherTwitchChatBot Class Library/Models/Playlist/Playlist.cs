@@ -1,5 +1,6 @@
 ﻿using ATCB.Library.Models.Misc;
 using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace ATCB.Library.Models.Music
         private List<PreexistingSong> Songs;
         private IWavePlayer waveOutDevice;
         private WaveStream audioFileReader;
+        private SampleChannel sampleChannel;
         private int current = -1;
 
         /// <summary>
@@ -129,16 +131,31 @@ namespace ATCB.Library.Models.Music
             }
         }
 
+        public void Start()
+        {
+            var song = GetNext();
+            audioFileReader = new AudioFileReader(song.FilePath);
+            sampleChannel = new SampleChannel(audioFileReader);
+            sampleChannel.Volume = 0.125f;
+            waveOutDevice.Init(sampleChannel);
+            waveOutDevice.Play();
+            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+        }
+
         /// <summary>
         /// Plays the playlist.
         /// </summary>
         public void Play()
         {
-            var song = GetNext();
-            audioFileReader = new MediaFoundationReader(song.FilePath);
-            waveOutDevice.Init(audioFileReader);
-            waveOutDevice.Play();
-            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            if (audioFileReader == null)
+                Start();
+            else
+                waveOutDevice.Play();
+        }
+
+        public void Pause()
+        {
+            waveOutDevice.Pause();
         }
 
         /// <summary>
@@ -158,11 +175,15 @@ namespace ATCB.Library.Models.Music
 
             var song = GetNext();
             waveOutDevice = new WaveOutEvent();
-            audioFileReader = new MediaFoundationReader(song.FilePath);
+            audioFileReader = new AudioFileReader(song.FilePath);
+            sampleChannel = new SampleChannel(audioFileReader);
+            sampleChannel.Volume = 0.125f;
+            waveOutDevice.Init(sampleChannel);
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
-            waveOutDevice.Init(audioFileReader);
             waveOutDevice.Play();
             Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            if (RequestedSongs.Count > 0)
+                DownloadNextInQueueAsync().GetAwaiter().GetResult();
         }
 
         /// <summary>

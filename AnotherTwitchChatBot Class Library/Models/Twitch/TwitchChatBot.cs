@@ -149,11 +149,6 @@ namespace ATCB.Library.Models.Twitch
             }
         }
 
-        public void SendMessageIfNotConsole()
-        {
-
-        }
-
         #region User Events
 
         private void OnUserConnected(object sender, OnConnectedArgs e)
@@ -174,6 +169,7 @@ namespace ATCB.Library.Models.Twitch
         private void OnBotConnected(object sender, OnConnectedArgs e)
         {
             Colorful.Console.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
+            speechSynthesizer.SpeakAsync($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
