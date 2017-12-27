@@ -1,4 +1,5 @@
-﻿using ATCB.Library.Models.Misc;
+﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Misc;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using System;
@@ -30,7 +31,6 @@ namespace ATCB.Library.Models.Music
             RequestedSongs = new Queue<RequestedSong>();
             Songs = new List<PreexistingSong>();
             waveOutDevice = new WaveOutEvent();
-            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/downloads");
         }
 
@@ -138,8 +138,9 @@ namespace ATCB.Library.Models.Music
             sampleChannel = new SampleChannel(audioFileReader);
             sampleChannel.Volume = 0.125f;
             waveOutDevice.Init(sampleChannel);
+            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             waveOutDevice.Play();
-            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            ConsoleHelper.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
         }
 
         /// <summary>
@@ -181,7 +182,7 @@ namespace ATCB.Library.Models.Music
             waveOutDevice.Init(sampleChannel);
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             waveOutDevice.Play();
-            Colorful.Console.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            ConsoleHelper.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
             if (RequestedSongs.Count > 0)
                 DownloadNextInQueueAsync().GetAwaiter().GetResult();
         }

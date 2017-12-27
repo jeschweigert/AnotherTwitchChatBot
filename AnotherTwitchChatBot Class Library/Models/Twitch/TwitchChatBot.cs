@@ -14,6 +14,7 @@ using System.Drawing;
 using System;
 using ATCB.Library.Models.Giveaways;
 using ATCB.Library.Models.Commands;
+using ATCB.Library.Helpers;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -56,13 +57,13 @@ namespace ATCB.Library.Models.Twitch
             // If the either of the usernames are blank, then we have to refresh the tokens.
             if (string.IsNullOrEmpty(Username))
             {
-                Colorful.Console.WriteLine("Refreshing user access token...");
+                ConsoleHelper.WriteLine("Refreshing user access token...");
                 userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken).Result;
                 Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             }
             if (string.IsNullOrEmpty(Botname))
             {
-                Colorful.Console.WriteLine("Refreshing bot access token...");
+                ConsoleHelper.WriteLine("Refreshing bot access token...");
                 botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
                 Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
@@ -72,6 +73,9 @@ namespace ATCB.Library.Models.Twitch
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
             commandFactory = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
+
+            // ATCB-made events
+            ConsoleHelper.OnConsoleCommand += (sender, e) => { PerformConsoleCommand((e as ConsoleCommandEventArgs).Message); };
 
             // User client events
             userClient.OnConnected += OnUserConnected;
@@ -153,7 +157,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnUserConnected(object sender, OnConnectedArgs e)
         {
-            Colorful.Console.WriteLine($"Hooked into {Username}'s account!");
+            ConsoleHelper.WriteLine($"Hooked into {Username}'s account!");
         }
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
@@ -168,13 +172,13 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnBotConnected(object sender, OnConnectedArgs e)
         {
-            Colorful.Console.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
+            ConsoleHelper.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
             speechSynthesizer.SpeakAsync($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
         {
-            Colorful.Console.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
+            ConsoleHelper.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
         }
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -182,7 +186,7 @@ namespace ATCB.Library.Models.Twitch
             StyleSheet styleSheet = new StyleSheet(Color.White);
             styleSheet.AddStyle(e.ChatMessage.DisplayName, e.ChatMessage.Color);
 
-            Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
+            ConsoleHelper.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
 
             if (e.ChatMessage.Bits > 0)
                 speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
@@ -193,7 +197,7 @@ namespace ATCB.Library.Models.Twitch
             StyleSheet styleSheet = new StyleSheet(Color.White);
             styleSheet.AddStyle(e.SentMessage.DisplayName, ColorTranslator.FromHtml(e.SentMessage.ColorHex));
 
-            Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}", styleSheet);
+            ConsoleHelper.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}", styleSheet);
         }
 
         private void OnNewSubscriber(object sender, OnNewSubscriberArgs e)

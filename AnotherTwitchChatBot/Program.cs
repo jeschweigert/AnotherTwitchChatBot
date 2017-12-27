@@ -1,4 +1,5 @@
-﻿using ATCB.Library.Models.Misc;
+﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Misc;
 using ATCB.Library.Models.Music;
 using ATCB.Library.Models.Twitch;
 using ATCB.Library.Models.WebApi;
@@ -38,13 +39,13 @@ namespace ATCB
             var FileContents = File.ReadAllText($"{AppDirectory}setupcomplete.txt");
             AppState = Guid.Parse(FileContents);
 
-            Colorful.Console.WriteLine("Grabbing credentials from database...");
+            ConsoleHelper.WriteLine("Grabbing credentials from database...");
             ChatBot = new TwitchChatBot(Authenticator, AppState);
-            Colorful.Console.WriteLine("Connecting to Twitch...");
+            ConsoleHelper.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
 
             // TODO: make playlists great again
-            Colorful.Console.WriteLine("Attempting to load the playlist...");
+            ConsoleHelper.WriteLine("Attempting to load the playlist...");
             GlobalVariables.GlobalPlaylist.LoadFromFolder("C:/Users/rocki/OneDrive/Music/STREM III");
             GlobalVariables.GlobalPlaylist.Shuffle();
             GlobalVariables.GlobalPlaylist.Play();
@@ -53,32 +54,11 @@ namespace ATCB
             List<char> charBuffer = new List<char>();
 
             while (ChatBot.IsConnected) {
-                var key = Colorful.Console.ReadKey();
-                if (key.Key == ConsoleKey.Enter && charBuffer.Count > 0)
-                {
-                    lock (locker)
-                    {
-                        StyleSheet styleSheet = new StyleSheet(Color.White);
-                        styleSheet.AddStyle("Console", Color.Gray);
-                        var sentMessage = new string(charBuffer.ToArray());
-
-                        Colorful.Console.WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: {sentMessage}", styleSheet);
-                        ChatBot.PerformConsoleCommand(sentMessage);
-                        charBuffer.Clear();
-                    }
-                }
-                else if (key.Key == ConsoleKey.Backspace && charBuffer.Count > 0)
-                {
-                    charBuffer.RemoveAt(charBuffer.Count - 1);
-                }
-                else if (char.IsLetterOrDigit(key.KeyChar))
-                {
-                    charBuffer.Add(key.KeyChar);
-                }
+                var key = ConsoleHelper.ReadKey();
             }
 
-            Colorful.Console.WriteLine("Press any key to exit...");
-            Colorful.Console.ReadKey(true);
+            ConsoleHelper.WriteLine("Press any key to exit...");
+            System.Console.ReadKey(true);
         }
 
         private static void FirstTimeSetup()
@@ -86,15 +66,15 @@ namespace ATCB
             var HasNotAuthenticated = true;
             AppState = Guid.NewGuid();
 
-            Colorful.Console.WriteLine("Hi there! It looks like you're starting ATCB for the first time.");
-            Colorful.Console.WriteLine("Just so you know, I'm going to need some permissions from your Twitch account to run correctly.");
+            ConsoleHelper.WriteLine("Hi there! It looks like you're starting ATCB for the first time.");
+            ConsoleHelper.WriteLine("Just so you know, I'm going to need some permissions from your Twitch account to run correctly.");
             while (HasNotAuthenticated)
             {
-                Colorful.Console.WriteLine("I'll open up the authentication page in your default browser, press any key once you've successfully authenticated.");
+                ConsoleHelper.WriteLine("I'll open up the authentication page in your default browser, press any key once you've successfully authenticated.");
                 Thread.Sleep(5000);
                 System.Diagnostics.Process.Start($"{OAuthUrl}&state={AppState.ToString()}");
-                Colorful.Console.ReadKey(true);
-                Colorful.Console.WriteLine("Checking for authentication...");
+                System.Console.ReadKey(true);
+                ConsoleHelper.WriteLine("Checking for authentication...");
                 try
                 {
                     var AccessToken = Authenticator.GetAccessTokenByStateAsync(AppState).Result;
@@ -102,10 +82,10 @@ namespace ATCB
                 }
                 catch (Exception)
                 {
-                    Colorful.Console.WriteLine("Authentication failed, uh oh. Let's send you back to Twitch's authentication page and try again!");
+                    ConsoleHelper.WriteLine("Authentication failed, uh oh. Let's send you back to Twitch's authentication page and try again!");
                 }
             }
-            Colorful.Console.WriteLine("Neat-o! We've hooked ourselves an access token! Look's like you're all good to go!");
+            ConsoleHelper.WriteLine("Neat-o! We've hooked ourselves an access token! Look's like you're all good to go!");
             File.WriteAllText($"{AppDirectory}setupcomplete.txt", AppState.ToString());
         }
     }

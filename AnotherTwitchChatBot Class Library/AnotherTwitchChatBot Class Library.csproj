@@ -122,6 +122,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\ConsoleCommandEventArgs.cs" />
+    <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Models\Commands\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
