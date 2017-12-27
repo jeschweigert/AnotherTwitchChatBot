@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using TwitchLib;
 using TwitchLib.Models.Client;
 using TwitchLib.Events.Client;
-using System.Speech.Synthesis;
 using TwitchLib.Enums;
 using Colorful;
 using System.Drawing;
@@ -15,6 +14,8 @@ using System;
 using ATCB.Library.Models.Giveaways;
 using ATCB.Library.Models.Commands;
 using ATCB.Library.Helpers;
+using SpeechLib.Synthesis;
+using TwitchLib.NetCore.Extensions.NetCore;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -23,7 +24,7 @@ namespace ATCB.Library.Models.Twitch
         private static readonly string ClientId = "r0rcrtf3wfququa8p1nkhsttam2io1";
         private static readonly Guid BotState = Guid.Parse("40b2f73b-9d51-4133-8c27-025a9d31bfcb");
 
-        private SpeechSynthesizer speechSynthesizer;
+        private SpeechSynthesis speechSynthesizer;
         private TwitchClient botClient, userClient;
         private TwitchAPI twitchApi;
         private WebAuthenticator authenticator;
@@ -72,7 +73,7 @@ namespace ATCB.Library.Models.Twitch
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
             commandFactory = new CommandFactory();
-            speechSynthesizer = new SpeechSynthesizer();
+            speechSynthesizer = new SpeechSynthesis();
 
             // ATCB-made events
             ConsoleHelper.OnConsoleCommand += (sender, e) => { PerformConsoleCommand((e as ConsoleCommandEventArgs).Message); };
@@ -162,7 +163,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
         {
-            speechSynthesizer.SpeakAsync($"{e.HostedByChannel} began hosting you for {e.Viewers} viewers!");
+            speechSynthesizer.Speak($"{e.HostedByChannel} began hosting you for {e.Viewers} viewers!");
             botClient.SendMessage($"Thanks for the host, @{e.HostedByChannel}!");
         }
 
@@ -173,7 +174,7 @@ namespace ATCB.Library.Models.Twitch
         private void OnBotConnected(object sender, OnConnectedArgs e)
         {
             ConsoleHelper.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
-            speechSynthesizer.SpeakAsync($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
+            speechSynthesizer.Speak($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
@@ -189,7 +190,7 @@ namespace ATCB.Library.Models.Twitch
             ConsoleHelper.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
 
             if (e.ChatMessage.Bits > 0)
-                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
+                speechSynthesizer.Speak($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
         }
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
@@ -205,24 +206,24 @@ namespace ATCB.Library.Models.Twitch
             switch (e.Subscriber.SubscriptionPlan)
             {
                 case SubscriptionPlan.Prime:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing via Twitch Prime!");
+                    speechSynthesizer.Speak($"Much thanks to {e.Subscriber.DisplayName} for subscribing via Twitch Prime!");
                     break;
                 case SubscriptionPlan.Tier2:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for their tier 2 subscription!");
+                    speechSynthesizer.Speak($"Much thanks to {e.Subscriber.DisplayName} for their tier 2 subscription!");
                     break;
                 case SubscriptionPlan.Tier3:
-                    speechSynthesizer.SpeakAsync($"Eternal gratitude to {e.Subscriber.DisplayName} for their tier 3 subscription!");
+                    speechSynthesizer.Speak($"Eternal gratitude to {e.Subscriber.DisplayName} for their tier 3 subscription!");
                     break;
                 default:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing!");
+                    speechSynthesizer.Speak($"Much thanks to {e.Subscriber.DisplayName} for subscribing!");
                     break;
             }
         }
 
         private void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
-            speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
-            speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
+            speechSynthesizer.Speak($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
+            speechSynthesizer.Speak(e.ReSubscriber.ResubMessage);
         }
 
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)

@@ -7,10 +7,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Media;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Id3.Id3v2;
 
 namespace ATCB.Library.Models.Music
 {
@@ -46,11 +46,12 @@ namespace ATCB.Library.Models.Music
         public void LoadFromFolder(string filePath)
         {
             DirectoryInfo d = new DirectoryInfo(filePath);
-            TagLib.File metadata;
             foreach (var file in d.GetFiles())
             {
-                metadata = TagLib.File.Create(file.FullName);
-                Enlist(new PreexistingSong(metadata.Tag.Title, metadata.Tag.JoinedPerformers, file.FullName));
+                var tag = new Id3.Mp3File(file.FullName);
+                var title = tag.GetAllTags().FirstOrDefault(x => !string.IsNullOrEmpty(x.Title))?.Title ?? file.Name;
+                var artists = string.Join(", ", tag.GetAllTags().FirstOrDefault(x => x.Artists != null)?.Artists.Value ?? new string[] { });
+                Enlist(new PreexistingSong(title, artists, file.FullName));
             }
         }
 
