@@ -1,4 +1,5 @@
-﻿using ATCB.Library.Models.Misc;
+﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Misc;
 using ATCB.Library.Models.Music;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using TwitchLib;
 using TwitchLib.Models.Client;
 using YoutubeExplode;
+using YoutubeSearch;
 
 namespace ATCB.Library.Models.Commands
 {
@@ -32,14 +34,30 @@ namespace ATCB.Library.Models.Commands
             }
             else if (context.ArgumentsAsList.Count > 1 || YoutubeClient.TryParseVideoId(context.ArgumentsAsList[0], out videoId) == false)
             {
-                client.SendMessage("Sorry! Requesting songs by query doesn't quite work yet, but requesting by URL does!");
+                // Request by YouTube query
+                var search = new VideoSearch();
+                var video = search.SearchQuery(context.ArgumentsAsString, 1).Where(x => TimeSpanHelper.ConvertDurationToTimeSpan(x.Duration).TotalMinutes < 8.0).FirstOrDefault();
+                if (video != null && YoutubeClient.TryParseVideoId(video.Url, out videoId))
+                {
+                    MakeRequest(videoId, context, client);
+                }
+                else
+                {
+                    client.SendMessage("Sorry! I couldn't find a song like the one you wanted!");
+                }
             }
-            if (!string.IsNullOrEmpty(videoId))
+            else if (!string.IsNullOrEmpty(videoId))
             {
-                var video = this.client.GetVideoAsync(videoId).Result;
-                client.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{video.Title}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
-                GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(videoId, context.ChatMessage.DisplayName));
+                // Request by YouTube URL
+                MakeRequest(videoId, context, client);
             }
+        }
+
+        private void MakeRequest(string videoId, ChatCommand context, TwitchClient client)
+        {
+            var video = this.client.GetVideoAsync(videoId).Result;
+            client.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{video.Title}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
+            GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(videoId, context.ChatMessage.DisplayName));
         }
     }
 }

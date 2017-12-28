@@ -173,7 +173,6 @@ namespace ATCB.Library.Models.Twitch
         private void OnBotConnected(object sender, OnConnectedArgs e)
         {
             ConsoleHelper.WriteLine($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
-            speechSynthesizer.SpeakAsync($"Bot \"{e.BotUsername}\" connected to {Username}'s stream!");
         }
 
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)

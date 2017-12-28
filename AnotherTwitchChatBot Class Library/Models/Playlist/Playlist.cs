@@ -23,6 +23,8 @@ namespace ATCB.Library.Models.Music
         private SampleChannel sampleChannel;
         private int current = -1;
 
+        public EventHandler<SongChangeEventArgs> OnSongChanged;
+
         /// <summary>
         /// Initializes a new Playlist object, which regulates both PreexistingSongs and RequestedSongs.
         /// </summary>
@@ -38,6 +40,11 @@ namespace ATCB.Library.Models.Music
         /// The number of songs currently in the request queue.
         /// </summary>
         public int RequestedSongCount => RequestedSongs.Count;
+
+        /// <summary>
+        /// The song that's currently being played.
+        /// </summary>
+        public Song CurrentSong { get; private set; }
 
         /// <summary>
         /// Gets all media files in a folder and adds them to the playlist.
@@ -133,14 +140,15 @@ namespace ATCB.Library.Models.Music
 
         public void Start()
         {
-            var song = GetNext();
-            audioFileReader = new AudioFileReader(song.FilePath);
+            CurrentSong = GetNext();
+            audioFileReader = new AudioFileReader(CurrentSong.FilePath);
             sampleChannel = new SampleChannel(audioFileReader);
             sampleChannel.Volume = 0.125f;
             waveOutDevice.Init(sampleChannel);
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             waveOutDevice.Play();
-            ConsoleHelper.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
+            OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
         }
 
         /// <summary>
@@ -174,15 +182,16 @@ namespace ATCB.Library.Models.Music
             waveOutDevice.Dispose();
             audioFileReader.Dispose();
 
-            var song = GetNext();
+            CurrentSong = GetNext();
             waveOutDevice = new WaveOutEvent();
-            audioFileReader = new AudioFileReader(song.FilePath);
+            audioFileReader = new AudioFileReader(CurrentSong.FilePath);
             sampleChannel = new SampleChannel(audioFileReader);
             sampleChannel.Volume = 0.125f;
             waveOutDevice.Init(sampleChannel);
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             waveOutDevice.Play();
-            ConsoleHelper.WriteLine($"Now Playing: \"{song.Title}\" by {song.Artist}");
+            ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
+            OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
             if (RequestedSongs.Count > 0)
                 DownloadNextInQueueAsync().GetAwaiter().GetResult();
         }

@@ -48,6 +48,7 @@ namespace ATCB
             ConsoleHelper.WriteLine("Attempting to load the playlist...");
             GlobalVariables.GlobalPlaylist.LoadFromFolder("C:/Users/rocki/OneDrive/Music/STREM III");
             GlobalVariables.GlobalPlaylist.Shuffle();
+            GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
             GlobalVariables.GlobalPlaylist.Play();
 
             object locker = new object();
@@ -59,6 +60,11 @@ namespace ATCB
 
             ConsoleHelper.WriteLine("Press any key to exit...");
             System.Console.ReadKey(true);
+        }
+
+        private static void OnPlaylistSongChanged(object sender, SongChangeEventArgs e)
+        {
+            File.WriteAllText($"{AppDirectory}current_song.txt", $"{e.Song.Artist} - {e.Song.Title}");
         }
 
         private static void FirstTimeSetup()

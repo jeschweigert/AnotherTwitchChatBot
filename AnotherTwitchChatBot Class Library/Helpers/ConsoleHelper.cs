@@ -67,7 +67,7 @@ namespace ATCB.Library.Helpers
                     var sentMessage = new string(charBuffer.ToArray());
                     StyleSheet styleSheet = new StyleSheet(Color.White);
                     styleSheet.AddStyle("Console", Color.Gray);
-                    WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: {sentMessage}", styleSheet, true);
+                    WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", styleSheet, true);
 
                     charBuffer.Clear();
                     OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage));

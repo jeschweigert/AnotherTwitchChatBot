@@ -120,13 +120,18 @@
     <Reference Include="YoutubeExplode, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YoutubeExplode.4.0.0\lib\net45\YoutubeExplode.dll</HintPath>
     </Reference>
+    <Reference Include="YoutubeSearch, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YoutubeSearch.dll.1.1\lib\YoutubeSearch.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\ConsoleCommandEventArgs.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
+    <Compile Include="Helpers\TimeSpanHelper.cs" />
     <Compile Include="Models\Commands\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
+    <Compile Include="Models\Commands\CurrentSongCommand.cs" />
     <Compile Include="Models\Commands\GiveawayCommand.cs" />
     <Compile Include="Models\Commands\PlayCommand.cs" />
     <Compile Include="Models\Commands\PauseCommand.cs" />
@@ -142,11 +147,11 @@
     <Compile Include="Models\Playlist\Song.cs" />
     <Compile Include="Models\Playlist\Playlist.cs" />
     <Compile Include="Models\Playlist\RequestedSong.cs" />
+    <Compile Include="Models\Playlist\SongChangeEventArgs.cs" />
     <Compile Include="Models\Playlist\SongEnumerator.cs" />
     <Compile Include="Models\Twitch\TwitchChatBot.cs" />
     <Compile Include="Models\Uno\UnoGame.cs" />
     <Compile Include="Models\WebApi\WebAuthenticator.cs" />
-    <Compile Include="Models\WebApi\WebSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
