@@ -132,6 +132,7 @@
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
     <Compile Include="Models\Commands\CurrentSongCommand.cs" />
+    <Compile Include="Models\Commands\DoorCommand.cs" />
     <Compile Include="Models\Commands\GiveawayCommand.cs" />
     <Compile Include="Models\Commands\PlayCommand.cs" />
     <Compile Include="Models\Commands\PauseCommand.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Models\Playlist\RequestedSong.cs" />
     <Compile Include="Models\Playlist\SongChangeEventArgs.cs" />
     <Compile Include="Models\Playlist\SongEnumerator.cs" />
+    <Compile Include="Models\Settings\ApplicationSettings.cs" />
     <Compile Include="Models\Twitch\TwitchChatBot.cs" />
     <Compile Include="Models\Uno\UnoGame.cs" />
     <Compile Include="Models\WebApi\WebAuthenticator.cs" />

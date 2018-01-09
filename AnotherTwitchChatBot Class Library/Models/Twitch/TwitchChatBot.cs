@@ -15,6 +15,8 @@ using System;
 using ATCB.Library.Models.Giveaways;
 using ATCB.Library.Models.Commands;
 using ATCB.Library.Helpers;
+using TwitchLib.Services;
+using TwitchLib.Events.Services.FollowerService;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -26,6 +28,7 @@ namespace ATCB.Library.Models.Twitch
         private SpeechSynthesizer speechSynthesizer;
         private TwitchClient botClient, userClient;
         private TwitchAPI twitchApi;
+        private FollowerService followerService;
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
@@ -68,14 +71,18 @@ namespace ATCB.Library.Models.Twitch
                 Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
 
-            twitchApi.Settings.AccessToken = botAccessToken;
+            twitchApi.Settings.AccessToken = userAccessToken;
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
+            followerService = new FollowerService(twitchApi);
             commandFactory = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
 
             // ATCB-made events
             ConsoleHelper.OnConsoleCommand += (sender, e) => { PerformConsoleCommand((e as ConsoleCommandEventArgs).Message); };
+
+            // TwitchLib Service events
+            followerService.OnNewFollowersDetected += OnNewFollowersDetected;
 
             // User client events
             userClient.OnConnected += OnUserConnected;
@@ -153,11 +160,23 @@ namespace ATCB.Library.Models.Twitch
             }
         }
 
+        #region Service Events
+        
+        private void OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
+        {
+            foreach (var follow in e.NewFollowers)
+            {
+                speechSynthesizer.SpeakAsync($"Thanks to {follow.User.DisplayName} for following!");
+            }
+        }
+
+        #endregion
+
         #region User Events
 
         private void OnUserConnected(object sender, OnConnectedArgs e)
         {
-            ConsoleHelper.WriteLine($"Hooked into {Username}'s account!");
+            ConsoleHelper.WriteLine($"Hooked into {e.BotUsername}'s account!");
         }
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
@@ -182,10 +201,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            StyleSheet styleSheet = new StyleSheet(Color.White);
-            styleSheet.AddStyle(e.ChatMessage.DisplayName, e.ChatMessage.Color);
-
-            ConsoleHelper.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}", styleSheet);
+            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
 
             if (e.ChatMessage.Bits > 0)
                 speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
@@ -193,14 +209,12 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
         {
-            StyleSheet styleSheet = new StyleSheet(Color.White);
-            styleSheet.AddStyle(e.SentMessage.DisplayName, ColorTranslator.FromHtml(e.SentMessage.ColorHex));
-
-            ConsoleHelper.WriteLineStyled($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}", styleSheet);
+            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] {e.SentMessage.DisplayName}: {e.SentMessage.Message}");
         }
 
         private void OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
+            ConsoleHelper.WriteLine($"{e.Subscriber.DisplayName} just subscribed!");
             switch (e.Subscriber.SubscriptionPlan)
             {
                 case SubscriptionPlan.Prime:
@@ -220,6 +234,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
+            ConsoleHelper.WriteLine($"{e.ReSubscriber.DisplayName} just re-subscribed for {e.ReSubscriber.Months} months!");
             speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
             speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
         }

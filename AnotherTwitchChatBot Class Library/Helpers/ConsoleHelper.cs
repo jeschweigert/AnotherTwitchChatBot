@@ -48,13 +48,12 @@ namespace ATCB.Library.Helpers
             OutputLineAndReplaceConsoleText(message, color);
         }
 
-        public static void WriteLineStyled(string message, StyleSheet styleSheet, bool deleteInput)
+        public static void WriteLineChat(string message, bool deleteInput = false)
         {
-            Colorful.Console.WriteLineStyled(message, styleSheet);
-        }
-        public static void WriteLineStyled(string message, StyleSheet styleSheet)
-        {
-            OutputLineAndReplaceConsoleTextStyled(message, styleSheet);
+            if (deleteInput)
+                Colorful.Console.WriteLine(message, Color.White);
+            else
+                OutputLineAndReplaceConsoleText(message, Color.White);
         }
 
         public static ConsoleKeyInfo ReadKey()
@@ -65,9 +64,7 @@ namespace ATCB.Library.Helpers
                 lock (locker)
                 {
                     var sentMessage = new string(charBuffer.ToArray());
-                    StyleSheet styleSheet = new StyleSheet(Color.White);
-                    styleSheet.AddStyle("Console", Color.Gray);
-                    WriteLineStyled($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", styleSheet, true);
+                    WriteLineChat($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", true);
 
                     charBuffer.Clear();
                     OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage));

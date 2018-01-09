@@ -141,9 +141,9 @@ namespace ATCB.Library.Models.Music
         public void Start()
         {
             CurrentSong = GetNext();
-            audioFileReader = new AudioFileReader(CurrentSong.FilePath);
+            audioFileReader = new MediaFoundationReader(CurrentSong.FilePath);
             sampleChannel = new SampleChannel(audioFileReader);
-            sampleChannel.Volume = 0.125f;
+            sampleChannel.Volume = 0.25f;
             waveOutDevice.Init(sampleChannel);
             waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
             waveOutDevice.Play();
@@ -184,7 +184,7 @@ namespace ATCB.Library.Models.Music
 
             CurrentSong = GetNext();
             waveOutDevice = new WaveOutEvent();
-            audioFileReader = new AudioFileReader(CurrentSong.FilePath);
+            audioFileReader = new MediaFoundationReader(CurrentSong.FilePath);
             sampleChannel = new SampleChannel(audioFileReader);
             sampleChannel.Volume = 0.125f;
             waveOutDevice.Init(sampleChannel);
