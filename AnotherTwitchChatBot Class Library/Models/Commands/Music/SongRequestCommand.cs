@@ -11,7 +11,7 @@ using TwitchLib.Models.Client;
 using YoutubeExplode;
 using YoutubeSearch;
 
-namespace ATCB.Library.Models.Commands
+namespace ATCB.Library.Models.Commands.Music
 {
     public class SongRequestCommand : Command
     {

@@ -85,7 +85,7 @@ namespace ATCB.Library.Helpers
                 if (key.Key == ConsoleKey.Backspace && charBuffer.Count > 0)
                 {
                     charBuffer.RemoveAt(charBuffer.Count - 1);
-                    Colorful.Console.Write(" \b");
+                    System.Console.Write("\b \b");
                 }
                 else if (char.IsLetterOrDigit(key.KeyChar) || char.IsWhiteSpace(key.KeyChar) || char.IsSymbol(key.KeyChar) || char.IsPunctuation(key.KeyChar))
                 {

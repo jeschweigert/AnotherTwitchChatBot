@@ -170,6 +170,12 @@ namespace ATCB.Library.Models.Music
                 SoundOut.Pause();
         }
 
+        public void SetVolume(float volume)
+        {
+            if (SoundOut != null)
+                SoundOut.Volume = volume;
+        }
+
         /// <summary>
         /// Skips to the next song.
         /// </summary>

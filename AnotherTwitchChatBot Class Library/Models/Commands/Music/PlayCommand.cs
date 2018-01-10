@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using TwitchLib;
 using TwitchLib.Models.Client;
 
-namespace ATCB.Library.Models.Commands
+namespace ATCB.Library.Models.Commands.Music
 {
     public class PlayCommand : Command
     {
