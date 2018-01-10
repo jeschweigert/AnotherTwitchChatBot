@@ -51,33 +51,47 @@ namespace ATCB.Library.Helpers
         public static void WriteLineChat(string message, bool deleteInput = false)
         {
             if (deleteInput)
+            {
+                for (int i = 0; i < charBuffer.Count; i++)
+                {
+                    Colorful.Console.Write("\b \b");
+                }
+
                 Colorful.Console.WriteLine(message, Color.White);
+            }
             else
                 OutputLineAndReplaceConsoleText(message, Color.White);
         }
 
         public static ConsoleKeyInfo ReadKey()
         {
-            var key = System.Console.ReadKey();
-            if (key.Key == ConsoleKey.Enter && charBuffer.Count > 0)
+            var key = System.Console.ReadKey(true);
+            if (key.Key == ConsoleKey.Enter)
             {
-                lock (locker)
+                if (charBuffer.Count > 0)
                 {
-                    var sentMessage = new string(charBuffer.ToArray());
-                    WriteLineChat($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", true);
+                    lock (locker)
+                    {
+                        var sentMessage = new string(charBuffer.ToArray());
+                        WriteLineChat($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", true);
 
-                    charBuffer.Clear();
-                    OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage));
+                        charBuffer.Clear();
+                        OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage));
+                    }
                 }
             }
-            else if (key.Key == ConsoleKey.Backspace && charBuffer.Count > 0)
+            else
             {
-                charBuffer.RemoveAt(charBuffer.Count - 1);
-                Colorful.Console.Write(" \b");
-            }
-            else if (char.IsLetterOrDigit(key.KeyChar) || char.IsWhiteSpace(key.KeyChar) || char.IsSymbol(key.KeyChar) || char.IsPunctuation(key.KeyChar))
-            {
-                charBuffer.Add(key.KeyChar);
+                if (key.Key == ConsoleKey.Backspace && charBuffer.Count > 0)
+                {
+                    charBuffer.RemoveAt(charBuffer.Count - 1);
+                    Colorful.Console.Write(" \b");
+                }
+                else if (char.IsLetterOrDigit(key.KeyChar) || char.IsWhiteSpace(key.KeyChar) || char.IsSymbol(key.KeyChar) || char.IsPunctuation(key.KeyChar))
+                {
+                    charBuffer.Add(key.KeyChar);
+                    System.Console.Write(key.KeyChar);
+                }
             }
             return key;
         }

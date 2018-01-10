@@ -69,7 +69,7 @@ namespace ATCB.Library.Models.Music
             var streamInfo = mediaStreamInfos.Audio.Where(x => x.Container != Container.WebM).First();
             var extension = streamInfo.Container.GetFileExtension();
 
-            if (File.Exists(path))
+            if (File.Exists($"{path}.{extension}"))
             {
                 FilePath = $"{path}.{extension}";
                 IsDownloaded = true;

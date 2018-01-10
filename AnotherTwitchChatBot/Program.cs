@@ -64,7 +64,10 @@ namespace ATCB
 
         private static void OnPlaylistSongChanged(object sender, SongChangeEventArgs e)
         {
-            File.WriteAllText($"{AppDirectory}current_song.txt", $"{e.Song.Artist} - {e.Song.Title}                    ");
+            using (StreamWriter writetext = new StreamWriter($"{AppDirectory}current_song.txt"))
+            {
+                writetext.WriteLine($"{e.Song.Artist} - {e.Song.Title}                    ");
+            }
         }
 
         private static void FirstTimeSetup()
