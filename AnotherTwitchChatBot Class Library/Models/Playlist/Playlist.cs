@@ -140,13 +140,6 @@ namespace ATCB.Library.Models.Music
         public void Start()
         {
             CurrentSong = GetNext();
-            //audioFileReader = new MediaFoundationReader(CurrentSong.FilePath);
-            //sampleChannel = new SampleChannel(audioFileReader);
-            //sampleChannel.Volume = 0.25f;
-            //waveOutDevice.Init(sampleChannel);
-            //waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
-            //waveOutDevice.Play();
-
             WaveSource = CodecFactory.Instance.GetCodec(CurrentSong.FilePath)
                     .ToSampleSource()
                     .ToMono()
@@ -156,7 +149,6 @@ namespace ATCB.Library.Models.Music
             SoundOut.Stopped += (sender, e) => { PlayNext(); };
             SoundOut.Volume = 0.25f;
             SoundOut.Play();
-
             ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
         }
@@ -189,7 +181,6 @@ namespace ATCB.Library.Models.Music
 
         private void PlayNext()
         {
-            //CleanupPlayback();
             CurrentSong = GetNext();
             WaveSource = CodecFactory.Instance.GetCodec(CurrentSong.FilePath)
                     .ToSampleSource()
@@ -213,20 +204,6 @@ namespace ATCB.Library.Models.Music
         {
             if (!RequestedSongs.Peek().IsDownloaded)
                 await RequestedSongs.Peek().DownloadAsync();
-        }
-
-        private void CleanupPlayback()
-        {
-            if (SoundOut != null)
-            {
-                SoundOut.Dispose();
-                SoundOut = null;
-            }
-            if (WaveSource != null)
-            {
-                WaveSource.Dispose();
-                WaveSource = null;
-            }
         }
 
         public IEnumerator GetEnumerator()
