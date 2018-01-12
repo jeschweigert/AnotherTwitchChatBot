@@ -33,16 +33,16 @@ namespace ATCB.Library.Models.Commands.Music
             }
             else
             {
-                var videoTitle = YouTubeHelper.GetTitle(context.ArgumentsAsList[0]);
+                var success = YoutubeClient.TryParseVideoId(context.ArgumentsAsString, out string videoId);
 
-                if (string.IsNullOrEmpty(videoTitle))
+                if (!success)
                 {
                     // Request by YouTube query
                     var search = new VideoSearch();
                     var video = search.SearchQuery(context.ArgumentsAsString, 1).Where(x => TimeSpanHelper.ConvertDurationToTimeSpan(x.Duration).TotalMinutes < 8.0).FirstOrDefault();
                     if (video != null)
                     {
-                        MakeRequest(YouTubeHelper.GetId(video.Url), YouTubeHelper.GetTitle(video.Url), context, client);
+                        MakeRequest(YoutubeClient.ParseVideoId(video.Url), context, client);
                     }
                     else
                     {
@@ -52,13 +52,14 @@ namespace ATCB.Library.Models.Commands.Music
                 else
                 {
                     // Request by YouTube URL
-                    MakeRequest(YouTubeHelper.GetId(context.ArgumentsAsList[0]), videoTitle, context, client);
+                    MakeRequest(videoId, context, client);
                 }
             }
         }
 
-        private void MakeRequest(string videoId, string videoTitle, ChatCommand context, TwitchClient client)
+        private void MakeRequest(string videoId, ChatCommand context, TwitchClient client)
         {
+            var videoTitle = Task.Run(() => this.client.GetVideoAsync(videoId)).Result.Title;
             client.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{videoTitle}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
             GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(videoId, context.ChatMessage.DisplayName));
         }
