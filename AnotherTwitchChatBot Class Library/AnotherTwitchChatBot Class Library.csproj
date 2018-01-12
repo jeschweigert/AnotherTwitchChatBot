@@ -102,6 +102,7 @@
     <Reference Include="System.Text.RegularExpressions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.RegularExpressions.4.3.0\lib\net463\System.Text.RegularExpressions.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -128,6 +129,7 @@
     <Compile Include="Helpers\ConsoleCommandEventArgs.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\TimeSpanHelper.cs" />
+    <Compile Include="Helpers\YouTubeHelper.cs" />
     <Compile Include="Models\Commands\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />

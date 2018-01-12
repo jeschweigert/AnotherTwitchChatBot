@@ -206,10 +206,11 @@ namespace ATCB.Library.Models.Music
         /// <summary>
         /// Starts downloading the next requested song in queue.
         /// </summary>
-        public async Task DownloadNextInQueueAsync()
+        public async Task<bool> DownloadNextInQueueAsync()
         {
             if (!RequestedSongs.Peek().IsDownloaded)
-                await RequestedSongs.Peek().DownloadAsync();
+                return await RequestedSongs.Peek().DownloadAsync().ConfigureAwait(false);
+            return true;
         }
 
         public IEnumerator GetEnumerator()

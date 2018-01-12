@@ -76,7 +76,7 @@ namespace ATCB.Library.Helpers
                         WriteLineChat($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", true);
 
                         charBuffer.Clear();
-                        OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage));
+                        Task.Run(() => { OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage)); });
                     }
                 }
             }

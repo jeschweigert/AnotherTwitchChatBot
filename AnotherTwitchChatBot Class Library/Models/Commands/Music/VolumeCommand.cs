@@ -26,6 +26,14 @@ namespace ATCB.Library.Models.Commands.Music
                     GlobalVariables.GlobalPlaylist.SetVolume(volumeAsFloat);
                     client.SendMessage($"Set the volume to {context.ArgumentsAsList[0]}.");
                 }
+                else
+                {
+                    client.SendMessage("Couldn't set the volume, the given value was invalid.");
+                }
+            }
+            else
+            {
+                client.SendMessage("You've got to give me something to set the volume to!");
             }
         }
     }
