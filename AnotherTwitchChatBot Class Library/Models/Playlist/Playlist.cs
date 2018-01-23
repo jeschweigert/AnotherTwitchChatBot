@@ -21,6 +21,7 @@ namespace ATCB.Library.Models.Music
         private List<PreexistingSong> Songs;
         private ISoundOut SoundOut;
         private IWaveSource WaveSource;
+        private float Volume = 0.25f;
         private int current = -1;
 
         public EventHandler<SongChangeEventArgs> OnSongChanged;
@@ -147,7 +148,7 @@ namespace ATCB.Library.Models.Music
             SoundOut = new WasapiOut();
             SoundOut.Initialize(WaveSource);
             SoundOut.Stopped += (sender, e) => { PlayNext(); };
-            SoundOut.Volume = 0.25f;
+            SoundOut.Volume = Volume;
             SoundOut.Play();
             ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
@@ -173,7 +174,10 @@ namespace ATCB.Library.Models.Music
         public void SetVolume(float volume)
         {
             if (SoundOut != null)
+            {
                 SoundOut.Volume = volume;
+                Volume = volume;
+            }
         }
 
         /// <summary>
@@ -195,7 +199,7 @@ namespace ATCB.Library.Models.Music
             SoundOut = new WasapiOut();
             SoundOut.Initialize(WaveSource);
             SoundOut.Stopped += (sender, e) => { PlayNext(); };
-            SoundOut.Volume = 0.25f;
+            SoundOut.Volume = Volume;
             SoundOut.Play();
             ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
