@@ -1,7 +1,8 @@
 ﻿using ATCB.Library.Helpers;
 using ATCB.Library.Models.Misc;
-using NAudio.Wave;
-using NAudio.Wave.SampleProviders;
+using CSCore;
+using CSCore.Codecs;
+using CSCore.SoundOut;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,9 +19,9 @@ namespace ATCB.Library.Models.Music
     {
         private Queue<RequestedSong> RequestedSongs;
         private List<PreexistingSong> Songs;
-        private IWavePlayer waveOutDevice;
-        private WaveStream audioFileReader;
-        private SampleChannel sampleChannel;
+        private ISoundOut SoundOut;
+        private IWaveSource WaveSource;
+        private float Volume = 0.25f;
         private int current = -1;
 
         public EventHandler<SongChangeEventArgs> OnSongChanged;
@@ -32,7 +33,6 @@ namespace ATCB.Library.Models.Music
         {
             RequestedSongs = new Queue<RequestedSong>();
             Songs = new List<PreexistingSong>();
-            waveOutDevice = new WaveOutEvent();
             Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/downloads");
         }
 
@@ -141,12 +141,15 @@ namespace ATCB.Library.Models.Music
         public void Start()
         {
             CurrentSong = GetNext();
-            audioFileReader = new MediaFoundationReader(CurrentSong.FilePath);
-            sampleChannel = new SampleChannel(audioFileReader);
-            sampleChannel.Volume = 0.25f;
-            waveOutDevice.Init(sampleChannel);
-            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
-            waveOutDevice.Play();
+            WaveSource = CodecFactory.Instance.GetCodec(CurrentSong.FilePath)
+                    .ToSampleSource()
+                    .ToMono()
+                    .ToWaveSource();
+            SoundOut = new WasapiOut();
+            SoundOut.Initialize(WaveSource);
+            SoundOut.Stopped += (sender, e) => { PlayNext(); };
+            SoundOut.Volume = Volume;
+            SoundOut.Play();
             ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
         }
@@ -156,15 +159,25 @@ namespace ATCB.Library.Models.Music
         /// </summary>
         public void Play()
         {
-            if (audioFileReader == null)
+            if (SoundOut == null)
                 Start();
             else
-                waveOutDevice.Play();
+                SoundOut.Play();
         }
 
         public void Pause()
         {
-            waveOutDevice.Pause();
+            if (SoundOut != null)
+                SoundOut.Pause();
+        }
+
+        public void SetVolume(float volume)
+        {
+            if (SoundOut != null)
+            {
+                SoundOut.Volume = volume;
+                Volume = volume;
+            }
         }
 
         /// <summary>
@@ -172,24 +185,22 @@ namespace ATCB.Library.Models.Music
         /// </summary>
         public void Skip()
         {
-            waveOutDevice.Stop();
-            while (waveOutDevice.PlaybackState != PlaybackState.Stopped) { }
+            SoundOut.Stop();
+            while (SoundOut.PlaybackState != PlaybackState.Stopped) { }
         }
 
         private void PlayNext()
         {
-            waveOutDevice.Stop();
-            waveOutDevice.Dispose();
-            audioFileReader.Dispose();
-
             CurrentSong = GetNext();
-            waveOutDevice = new WaveOutEvent();
-            audioFileReader = new MediaFoundationReader(CurrentSong.FilePath);
-            sampleChannel = new SampleChannel(audioFileReader);
-            sampleChannel.Volume = 0.125f;
-            waveOutDevice.Init(sampleChannel);
-            waveOutDevice.PlaybackStopped += (sender, e) => { PlayNext(); };
-            waveOutDevice.Play();
+            WaveSource = CodecFactory.Instance.GetCodec(CurrentSong.FilePath)
+                    .ToSampleSource()
+                    .ToMono()
+                    .ToWaveSource();
+            SoundOut = new WasapiOut();
+            SoundOut.Initialize(WaveSource);
+            SoundOut.Stopped += (sender, e) => { PlayNext(); };
+            SoundOut.Volume = Volume;
+            SoundOut.Play();
             ConsoleHelper.WriteLine($"Now Playing: \"{CurrentSong.Title}\" by {CurrentSong.Artist}");
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
             if (RequestedSongs.Count > 0)
@@ -199,10 +210,11 @@ namespace ATCB.Library.Models.Music
         /// <summary>
         /// Starts downloading the next requested song in queue.
         /// </summary>
-        public async Task DownloadNextInQueueAsync()
+        public async Task<bool> DownloadNextInQueueAsync()
         {
             if (!RequestedSongs.Peek().IsDownloaded)
-                await RequestedSongs.Peek().DownloadAsync();
+                return await RequestedSongs.Peek().DownloadAsync().ConfigureAwait(false);
+            return true;
         }
 
         public IEnumerator GetEnumerator()
