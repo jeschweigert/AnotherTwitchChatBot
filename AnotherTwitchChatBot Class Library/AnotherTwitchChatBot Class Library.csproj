@@ -155,7 +155,6 @@
     <Compile Include="Models\Playlist\SongEnumerator.cs" />
     <Compile Include="Models\Settings\ApplicationSettings.cs" />
     <Compile Include="Models\Twitch\TwitchChatBot.cs" />
-    <Compile Include="Models\Uno\UnoGame.cs" />
     <Compile Include="Models\WebApi\WebAuthenticator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
