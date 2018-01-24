@@ -152,11 +152,11 @@ namespace ATCB.Library.Models.Twitch
             if (command != null)
             {
                 var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                command.Run(new CommandContext(botClient, context));
+                new Task(() => { command.Run(new CommandContext(botClient, context, true)); }).Start();
             }
             else
             {
-                botClient.SendMessage($"Command \"{commandText}\" was not found.");
+                ConsoleHelper.WriteLine($"Command \"{commandText}\" was not found.");
             }
         }
 
@@ -245,7 +245,7 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                command.Run(new CommandContext(botClient, e.Command));
+                new Task(() => { command.Run(new CommandContext(botClient, e.Command)); }).Start();
             }
             else
             {

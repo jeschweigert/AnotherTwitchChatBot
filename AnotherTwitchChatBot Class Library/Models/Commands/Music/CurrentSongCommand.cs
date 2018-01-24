@@ -1,4 +1,5 @@
 ﻿using ATCB.Library.Models.Misc;
+using ATCB.Library.Models.Music;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,11 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override void Run(CommandContext context)
         {
-            context.SendMessage($"The current song is \"{GlobalVariables.GlobalPlaylist.CurrentSong.Title}\" by {GlobalVariables.GlobalPlaylist.CurrentSong.Artist}");
+            var currentSong = GlobalVariables.GlobalPlaylist.CurrentSong;
+            if (currentSong is RequestedSong)
+                context.SendMessage($"The current song is \"{currentSong.Title}\", as requested by {((RequestedSong)currentSong).Requester}");
+            else
+                context.SendMessage($"The current song is \"{currentSong.Title}\" by {currentSong.Artist}");
         }
     }
 }

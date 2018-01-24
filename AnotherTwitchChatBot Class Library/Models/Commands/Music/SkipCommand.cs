@@ -17,7 +17,8 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override void Run(CommandContext context)
         {
-            GlobalVariables.GlobalPlaylist.Skip();
+            if (context.ChatMessage.IsModeratorOrBroadcaster)
+                GlobalVariables.GlobalPlaylist.Skip();
         }
     }
 }

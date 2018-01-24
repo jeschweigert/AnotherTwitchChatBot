@@ -17,7 +17,8 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override void Run(CommandContext context)
         {
-            GlobalVariables.GlobalPlaylist.Pause();
+            if (context.ChatMessage.IsBroadcaster)
+                GlobalVariables.GlobalPlaylist.Pause();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATCB.Library.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -76,7 +77,9 @@ namespace ATCB.Library.Models.Music
                 return true;
             }
 
+            ConsoleHelper.WriteLine($"Now Downloading: \"{Video.Title}\"");
             await youtubeClient.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}");
+            ConsoleHelper.WriteLine($"Finished Downloading: \"{Video.Title}\"");
             FilePath = $"{path}.{extension}";
             IsDownloaded = true;
             return true;

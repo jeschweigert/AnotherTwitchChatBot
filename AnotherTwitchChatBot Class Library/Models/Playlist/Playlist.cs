@@ -68,7 +68,33 @@ namespace ATCB.Library.Models.Music
         public Song GetNext()
         {
             if (RequestedSongs.Count > 0 && RequestedSongs.Peek().IsDownloaded)
+            {
+                var song = RequestedSongs.Peek();
+                FileStream stream = null;
+                FileInfo file = new FileInfo(song.FilePath);
+                try
+                {
+                    stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+                }
+                catch (IOException)
+                {
+                    try
+                    {
+                        return Songs[++current];
+                    }
+                    catch (Exception)
+                    {
+                        current = 0;
+                        return Songs[current];
+                    }
+                }
+                finally
+                {
+                    if (stream != null)
+                        stream.Dispose();
+                }
                 return RequestedSongs.Dequeue();
+            }
             try
             {
                 return Songs[++current];
