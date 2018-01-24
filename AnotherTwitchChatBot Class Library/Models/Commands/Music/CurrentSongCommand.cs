@@ -17,9 +17,9 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
-            client.SendMessage($"The current song is \"{GlobalVariables.GlobalPlaylist.CurrentSong.Title}\" by {GlobalVariables.GlobalPlaylist.CurrentSong.Artist}");
+            context.SendMessage($"The current song is \"{GlobalVariables.GlobalPlaylist.CurrentSong.Title}\" by {GlobalVariables.GlobalPlaylist.CurrentSong.Artist}");
         }
     }
 }

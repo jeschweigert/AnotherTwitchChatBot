@@ -25,11 +25,11 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
             if (context.ArgumentsAsList.Count < 1)
             {
-                client.SendMessage("You didn't give me anything to add.");
+                context.SendMessage("You didn't give me anything to add.");
             }
             else
             {
@@ -42,25 +42,25 @@ namespace ATCB.Library.Models.Commands.Music
                     var video = search.SearchQuery(context.ArgumentsAsString, 1).Where(x => TimeSpanHelper.ConvertDurationToTimeSpan(x.Duration).TotalMinutes < 8.0).FirstOrDefault();
                     if (video != null)
                     {
-                        MakeRequest(YoutubeClient.ParseVideoId(video.Url), context, client);
+                        MakeRequest(YoutubeClient.ParseVideoId(video.Url), context);
                     }
                     else
                     {
-                        client.SendMessage("Sorry! I couldn't find a song like the one you wanted!");
+                        context.SendMessage("Sorry! I couldn't find a song like the one you wanted!");
                     }
                 }
                 else
                 {
                     // Request by YouTube URL
-                    MakeRequest(videoId, context, client);
+                    MakeRequest(videoId, context);
                 }
             }
         }
 
-        private void MakeRequest(string videoId, ChatCommand context, TwitchClient client)
+        private void MakeRequest(string videoId, CommandContext context)
         {
             var videoTitle = Task.Run(() => this.client.GetVideoAsync(videoId)).Result.Title;
-            client.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{videoTitle}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
+            context.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{videoTitle}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
             GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(videoId, context.ChatMessage.DisplayName));
         }
     }

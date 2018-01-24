@@ -152,7 +152,7 @@ namespace ATCB.Library.Models.Twitch
             if (command != null)
             {
                 var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                command.Run(context, botClient);
+                command.Run(new CommandContext(botClient, context));
             }
             else
             {
@@ -245,7 +245,7 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                command.Run(e.Command, botClient);
+                command.Run(new CommandContext(botClient, e.Command));
             }
             else
             {

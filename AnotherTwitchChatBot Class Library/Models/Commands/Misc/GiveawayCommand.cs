@@ -18,7 +18,7 @@ namespace ATCB.Library.Models.Commands
 
         public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
             if (context.ArgumentsAsList.Count > 0 && (context.ChatMessage.IsModerator || context.ChatMessage.IsBroadcaster))
             {
@@ -30,18 +30,18 @@ namespace ATCB.Library.Models.Commands
                             {
                                 giveaway = new ViewerGiveaway();
                                 giveaway.Start();
-                                client.SendMessage("Starting a giveaway! Type \"!giveaway\" to enter!");
+                                context.SendMessage("Starting a giveaway! Type \"!giveaway\" to enter!");
                             }
                         }
                         break;
                     case "end":
                         {
-                            client.SendMessage($"Giveaway ended! The lucky winner is... @{giveaway.End()}!");
+                            context.SendMessage($"Giveaway ended! The lucky winner is... @{giveaway.End()}!");
                             giveaway = null;
                         }
                         break;
                     default:
-                        client.SendMessage($"\"{context.ArgumentsAsString}\" is not a valid argument for the command \"{context.CommandText}\".");
+                        context.SendMessage($"\"{context.ArgumentsAsString}\" is not a valid argument for the command \"{context.CommandText}\".");
                         break;
                 }
             }

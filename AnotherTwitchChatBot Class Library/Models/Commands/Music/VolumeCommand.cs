@@ -15,7 +15,7 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override bool IsSynonym(string commandText) => commandText.Equals("volume");
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
             if (context.ArgumentsAsList.Count > 0)
             {
@@ -24,16 +24,16 @@ namespace ATCB.Library.Models.Commands.Music
                 {
                     var volumeAsFloat = (float)newVolume / 100;
                     GlobalVariables.GlobalPlaylist.SetVolume(volumeAsFloat);
-                    client.SendMessage($"Set the volume to {context.ArgumentsAsList[0]}.");
+                    context.SendMessage($"Set the volume to {context.ArgumentsAsList[0]}.");
                 }
                 else
                 {
-                    client.SendMessage("Couldn't set the volume, the given value was invalid.");
+                    context.SendMessage("Couldn't set the volume, the given value was invalid.");
                 }
             }
             else
             {
-                client.SendMessage("You've got to give me something to set the volume to!");
+                context.SendMessage("You've got to give me something to set the volume to!");
             }
         }
     }

@@ -15,7 +15,7 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override bool IsSynonym(string commandText) => commandText.Equals("pause");
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
             GlobalVariables.GlobalPlaylist.Pause();
         }
