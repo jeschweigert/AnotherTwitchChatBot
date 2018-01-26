@@ -23,14 +23,11 @@ namespace ATCB.Library.Models.Music
         /// <summary>
         /// Whether or not the song in question has been downloaded yet.
         /// </summary>
-        public bool IsDownloaded { get; internal set; }
+        public bool IsDownloaded { get; internal set; } = false;
 
         private YoutubeClient youtubeClient;
         private Video Video;
-
-        /// <summary>
-        /// Initializes an empty RequestedSong`1 object.
-        /// </summary>
+        
         public RequestedSong()
         {
             youtubeClient = new YoutubeClient();
@@ -39,7 +36,6 @@ namespace ATCB.Library.Models.Music
             Artist = null;
             FilePath = null;
             Requester = null;
-            IsDownloaded = false;
         }
         public RequestedSong(string videoId, string requester)
         {
@@ -49,7 +45,6 @@ namespace ATCB.Library.Models.Music
             Artist = Video.Author;
             FilePath = null;
             Requester = requester;
-            IsDownloaded = false;
         }
 
         /// <summary>
@@ -78,11 +73,15 @@ namespace ATCB.Library.Models.Music
             }
 
             ConsoleHelper.WriteLine($"Now Downloading: \"{Video.Title}\"");
-            await youtubeClient.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}");
-            ConsoleHelper.WriteLine($"Finished Downloading: \"{Video.Title}\"");
+            await youtubeClient.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}").ContinueWith(task => { OnDownloadCompletion(); });
             FilePath = $"{path}.{extension}";
-            IsDownloaded = true;
             return true;
+        }
+
+        private void OnDownloadCompletion()
+        {
+            ConsoleHelper.WriteLine($"Finished Downloading: \"{Video.Title}\"");
+            IsDownloaded = true;
         }
 
         private Video TryGetVideo(string videoId)

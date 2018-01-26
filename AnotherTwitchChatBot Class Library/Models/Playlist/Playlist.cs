@@ -23,6 +23,7 @@ namespace ATCB.Library.Models.Music
         private IWaveSource WaveSource;
         private float Volume = 0.25f;
         private int current = -1;
+        private bool IsDownloading = false;
 
         public EventHandler<SongChangeEventArgs> OnSongChanged;
 
@@ -69,30 +70,6 @@ namespace ATCB.Library.Models.Music
         {
             if (RequestedSongs.Count > 0 && RequestedSongs.Peek().IsDownloaded)
             {
-                var song = RequestedSongs.Peek();
-                FileStream stream = null;
-                FileInfo file = new FileInfo(song.FilePath);
-                try
-                {
-                    stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
-                }
-                catch (IOException)
-                {
-                    try
-                    {
-                        return Songs[++current];
-                    }
-                    catch (Exception)
-                    {
-                        current = 0;
-                        return Songs[current];
-                    }
-                }
-                finally
-                {
-                    if (stream != null)
-                        stream.Dispose();
-                }
                 return RequestedSongs.Dequeue();
             }
             try
@@ -236,11 +213,13 @@ namespace ATCB.Library.Models.Music
         /// <summary>
         /// Starts downloading the next requested song in queue.
         /// </summary>
-        public async Task<bool> DownloadNextInQueueAsync()
+        public async Task DownloadNextInQueueAsync()
         {
-            if (!RequestedSongs.Peek().IsDownloaded)
-                return await RequestedSongs.Peek().DownloadAsync().ConfigureAwait(false);
-            return true;
+            if (!RequestedSongs.Peek().IsDownloaded && !IsDownloading)
+            {
+                IsDownloading = true;
+                await RequestedSongs.Peek().DownloadAsync().ContinueWith(task => { IsDownloading = false; }).ConfigureAwait(false);
+            }
         }
 
         public IEnumerator GetEnumerator()

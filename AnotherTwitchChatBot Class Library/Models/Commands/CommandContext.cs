@@ -31,10 +31,13 @@ namespace ATCB.Library.Models.Commands
             Context = context;
             ChatMessage = new ChatMessageContext();
             ChatMessage.Bits = context.ChatMessage.Bits;
+            ChatMessage.IsChatBot = fromConsole;
             ChatMessage.DisplayName = context.ChatMessage.DisplayName;
             ChatMessage.IsBroadcaster = context.ChatMessage.IsBroadcaster;
             ChatMessage.IsModerator = context.ChatMessage.IsModerator;
             ChatMessage.IsModeratorOrBroadcaster = context.ChatMessage.IsBroadcaster || context.ChatMessage.IsModerator;
+            ChatMessage.IsSubscriber = context.ChatMessage.IsSubscriber;
+            ChatMessage.Message = context.ChatMessage.Message;
             FromConsole = fromConsole;
         }
 
@@ -59,8 +62,11 @@ namespace ATCB.Library.Models.Commands
             public int Bits { get; set; }
             public string DisplayName { get; set; }
             public bool IsBroadcaster { get; set; }
+            public bool IsChatBot { get; set; }
             public bool IsModerator { get; set; }
             public bool IsModeratorOrBroadcaster { get; set; }
+            public bool IsSubscriber { get; set; }
+            public string Message { get; set; }
         }
     }
 }
