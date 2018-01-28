@@ -18,7 +18,10 @@ namespace ATCB.Library.Models.Commands.Music
         public override void Run(CommandContext context)
         {
             if (context.ChatMessage.IsBroadcaster || context.ChatMessage.IsChatBot)
+            {
                 GlobalVariables.GlobalPlaylist.Play();
+                context.SendMessage("The playlist is now playing.");
+            }
         }
     }
 }

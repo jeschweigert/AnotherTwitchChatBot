@@ -152,7 +152,7 @@ namespace ATCB.Library.Models.Twitch
             if (command != null)
             {
                 var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                new Task(() => { command.Run(new CommandContext(botClient, context, true)); }).Start();
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, true)); }).Start();
             }
             else
             {
@@ -167,6 +167,7 @@ namespace ATCB.Library.Models.Twitch
             foreach (var follow in e.NewFollowers)
             {
                 speechSynthesizer.SpeakAsync($"Thanks to {follow.User.DisplayName} for following!");
+                botClient.SendMessage($"Thanks to {follow.User.DisplayName} for following!");
             }
         }
 
@@ -245,7 +246,7 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                new Task(() => { command.Run(new CommandContext(botClient, e.Command)); }).Start();
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command)); }).Start();
             }
             else
             {

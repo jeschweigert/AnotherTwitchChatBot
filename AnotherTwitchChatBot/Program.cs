@@ -1,6 +1,7 @@
 ﻿using ATCB.Library.Helpers;
 using ATCB.Library.Models.Misc;
 using ATCB.Library.Models.Music;
+using ATCB.Library.Models.Settings;
 using ATCB.Library.Models.Twitch;
 using ATCB.Library.Models.WebApi;
 using Colorful;
@@ -24,32 +25,33 @@ namespace ATCB
         
         private static WebAuthenticator Authenticator;
         private static TwitchChatBot ChatBot;
-        
-        private static Guid AppState;
+
+        private static ApplicationSettings Settings;
 
         static void Main(string[] args)
         {
             Authenticator = new WebAuthenticator();
-            if (!File.Exists($"{AppDirectory}setupcomplete.txt"))
+            Settings = new ApplicationSettings();
+            if (!Settings.Exists())
             {
                 FirstTimeSetup();
             }
-            
-            // TODO: create json/xml settings file instead of this
-            var FileContents = File.ReadAllText($"{AppDirectory}setupcomplete.txt");
-            AppState = Guid.Parse(FileContents);
+            Settings = Settings.Load();
 
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
-            ChatBot = new TwitchChatBot(Authenticator, AppState);
+            ChatBot = new TwitchChatBot(Authenticator, Settings.AppState);
             ConsoleHelper.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
 
             // TODO: make playlists great again
-            ConsoleHelper.WriteLine("Attempting to load the playlist...");
-            GlobalVariables.GlobalPlaylist.LoadFromFolder("C:/Users/rocki/OneDrive/Music/STREM III");
-            GlobalVariables.GlobalPlaylist.Shuffle();
-            GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
-            GlobalVariables.GlobalPlaylist.Play();
+            if (Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
+            {
+                ConsoleHelper.WriteLine("Loading the playlist...");
+                GlobalVariables.GlobalPlaylist.LoadFromFolder(Settings.PlaylistLocation);
+                GlobalVariables.GlobalPlaylist.Shuffle();
+                GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
+                GlobalVariables.GlobalPlaylist.Play();
+            }
 
             object locker = new object();
             List<char> charBuffer = new List<char>();
@@ -73,7 +75,7 @@ namespace ATCB
         private static void FirstTimeSetup()
         {
             var HasNotAuthenticated = true;
-            AppState = Guid.NewGuid();
+            Settings.AppState = Guid.NewGuid();
 
             ConsoleHelper.WriteLine("Hi there! It looks like you're starting ATCB for the first time.");
             ConsoleHelper.WriteLine("Just so you know, I'm going to need some permissions from your Twitch account to run correctly.");
@@ -81,12 +83,12 @@ namespace ATCB
             {
                 ConsoleHelper.WriteLine("I'll open up the authentication page in your default browser, press any key once you've successfully authenticated.");
                 Thread.Sleep(5000);
-                System.Diagnostics.Process.Start($"{OAuthUrl}&state={AppState.ToString()}");
+                System.Diagnostics.Process.Start($"{OAuthUrl}&state={Settings.AppState.ToString()}");
                 System.Console.ReadKey(true);
                 ConsoleHelper.WriteLine("Checking for authentication...");
                 try
                 {
-                    var AccessToken = Authenticator.GetAccessTokenByStateAsync(AppState).Result;
+                    var AccessToken = Authenticator.GetAccessTokenByStateAsync(Settings.AppState).Result;
                     HasNotAuthenticated = false;
                 }
                 catch (Exception)
@@ -95,7 +97,7 @@ namespace ATCB
                 }
             }
             ConsoleHelper.WriteLine("Neat-o! We've hooked ourselves an access token! Look's like you're all good to go!");
-            File.WriteAllText($"{AppDirectory}setupcomplete.txt", AppState.ToString());
+            Settings.Save();
         }
     }
 }
