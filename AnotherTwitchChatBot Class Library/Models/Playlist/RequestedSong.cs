@@ -58,8 +58,8 @@ namespace ATCB.Library.Models.Music
             if (Video == null)
                 return false;
 
-            var fileName = ToSafeFileName(Video.Title);
-            var path = APP_DIRECTORY + "downloads\\" + fileName;
+            var fileName = ToSafeFileName(Video.Id);
+            var path = $"{APP_DIRECTORY}downloads\\{fileName}";
 
             var mediaStreamInfos = await youtubeClient.GetVideoMediaStreamInfosAsync(Video.Id);
             var streamInfo = mediaStreamInfos.Audio.Where(x => x.Container != Container.WebM).First();
@@ -80,7 +80,7 @@ namespace ATCB.Library.Models.Music
 
         private void OnDownloadCompletion()
         {
-            ConsoleHelper.WriteLine($"Finished Downloading: \"{Video.Title}\"");
+            ConsoleHelper.WriteLine($"Download Finished: \"{Video.Title}\"");
             IsDownloaded = true;
         }
 

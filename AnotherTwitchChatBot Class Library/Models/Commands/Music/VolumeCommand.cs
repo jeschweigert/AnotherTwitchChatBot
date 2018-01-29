@@ -17,6 +17,12 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override void Run(CommandContext context)
         {
+            if (!context.ChatMessage.IsBroadcaster && !context.ChatMessage.IsChatBot)
+            {
+                context.SendMessage("Only the broadcaster has permission to change the volume.");
+                return;
+            }
+
             if (context.ArgumentsAsList.Count > 0)
             {
                 var success = double.TryParse(context.ArgumentsAsList[0], out double newVolume);

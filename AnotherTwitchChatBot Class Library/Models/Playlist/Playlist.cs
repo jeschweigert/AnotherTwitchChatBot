@@ -24,6 +24,7 @@ namespace ATCB.Library.Models.Music
         private float Volume = 0.25f;
         private int current = -1;
         private bool IsDownloading = false;
+        private string[] SafeFileExtensions = { ".mp3", ".m4a", ".wav" };
 
         public EventHandler<SongChangeEventArgs> OnSongChanged;
 
@@ -34,13 +35,18 @@ namespace ATCB.Library.Models.Music
         {
             RequestedSongs = new Queue<RequestedSong>();
             Songs = new List<PreexistingSong>();
-            Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}/downloads");
+            Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}downloads");
         }
 
         /// <summary>
         /// The number of songs currently in the request queue.
         /// </summary>
         public int RequestedSongCount => RequestedSongs.Count;
+
+        /// <summary>
+        /// Whether or not the playlist is set to accept song requests.
+        /// </summary>
+        public bool AcceptRequests { get; private set; } = true;
 
         /// <summary>
         /// The song that's currently being played.
@@ -53,9 +59,14 @@ namespace ATCB.Library.Models.Music
         /// <param name="filePath">The path to the folder.</param>
         public void LoadFromFolder(string filePath)
         {
+            if (Songs.Count != 0)
+            {
+                Songs = new List<PreexistingSong>();
+            }
+
             DirectoryInfo d = new DirectoryInfo(filePath);
             TagLib.File metadata;
-            foreach (var file in d.GetFiles())
+            foreach (var file in d.GetFiles().Where(x => SafeFileExtensions.Contains(x.Extension)))
             {
                 metadata = TagLib.File.Create(file.FullName);
                 Enlist(new PreexistingSong(metadata.Tag.Title, metadata.Tag.JoinedPerformers, file.FullName));
@@ -98,6 +109,11 @@ namespace ATCB.Library.Models.Music
                 current = Songs.Count() - 1;
                 return Songs[current];
             }
+        }
+
+        public void ToggleRequests()
+        {
+            AcceptRequests = !AcceptRequests;
         }
 
         /// <summary>
@@ -208,6 +224,13 @@ namespace ATCB.Library.Models.Music
             OnSongChanged(this, new SongChangeEventArgs(CurrentSong));
             if (RequestedSongs.Count > 0)
                 DownloadNextInQueueAsync().GetAwaiter().GetResult();
+        }
+
+        public void Reset()
+        {
+            current = -1;
+            if (SoundOut != null)
+                SoundOut.Stop();
         }
 
         /// <summary>

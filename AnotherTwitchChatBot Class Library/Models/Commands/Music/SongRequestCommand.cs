@@ -27,6 +27,12 @@ namespace ATCB.Library.Models.Commands.Music
 
         public override void Run(CommandContext context)
         {
+            if (!GlobalVariables.GlobalPlaylist.AcceptRequests)
+            {
+                context.SendMessage("Requests aren't being taken at the moment, sorry!");
+                return;
+            }
+
             if (context.ArgumentsAsList.Count < 1)
             {
                 context.SendMessage("You didn't give me anything to add.");
