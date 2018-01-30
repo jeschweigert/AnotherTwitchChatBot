@@ -37,19 +37,19 @@ namespace ATCB
                 FirstTimeSetup();
             }
             Settings = Settings.Load();
+            GlobalVariables.AppSettings = Settings;
 
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
             ChatBot = new TwitchChatBot(Authenticator, Settings.AppState);
             ConsoleHelper.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
-
-            // TODO: make playlists great again
+            
+            GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
             if (Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
             {
                 ConsoleHelper.WriteLine("Loading the playlist...");
                 GlobalVariables.GlobalPlaylist.LoadFromFolder(Settings.PlaylistLocation);
                 GlobalVariables.GlobalPlaylist.Shuffle();
-                GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
                 GlobalVariables.GlobalPlaylist.Play();
             }
 

@@ -231,6 +231,8 @@ namespace ATCB.Library.Models.Music
             current = -1;
             if (SoundOut != null)
                 SoundOut.Stop();
+            else
+                Play();
         }
 
         /// <summary>

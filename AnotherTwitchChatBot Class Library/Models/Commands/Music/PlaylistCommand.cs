@@ -77,29 +77,34 @@ namespace ATCB.Library.Models.Commands.Music
 
                     var playlist = await client.GetPlaylistAsync(playlistId).ConfigureAwait(false);
                     var downloadStart = DateTime.Now;
+                    int position = 1;
                     ConsoleHelper.WriteLine($"Now Downloading: Playlist \"{playlist.Title}\"");
                     foreach (var video in playlist.Videos)
                     {
-                        var path = $"{playlistDirectory}\\{video.Id}";
+                        var filepath = $"{playlistDirectory}\\{video.Id}";
+                        var files = Directory.GetFiles($@".\playlists\{playlistId}", $"{video.Id}.*");
 
-                        var mediaStreamInfos = await client.GetVideoMediaStreamInfosAsync(video.Id);
-                        var streamInfo = mediaStreamInfos.Audio.Where(x => x.Container != Container.WebM).First();
-                        var extension = streamInfo.Container.GetFileExtension();
-
-                        if (File.Exists($"{path}.{extension}"))
+                        if (files.Count() > 0)
                         {
                             ConsoleHelper.WriteLine($"Video \"{video.Title}\" already downloaded, skipping.");
-                            return;
+                        }
+                        else
+                        {
+                            var mediaStreamInfos = await client.GetVideoMediaStreamInfosAsync(video.Id);
+                            var streamInfo = mediaStreamInfos.Audio.Where(x => x.Container != Container.WebM).First();
+                            var extension = streamInfo.Container.GetFileExtension();
+
+                            ConsoleHelper.WriteLine($"Now Downloading: \"{video.Title}\" ({position}/{playlist.Videos.Count})");
+                            await client.DownloadMediaStreamAsync(streamInfo, $"{filepath}.{extension}").ContinueWith(task => { ConsoleHelper.WriteLine($"Download Finished: \"{video.Title}\" ({position}/{playlist.Videos.Count})"); });
+                            using (TagLib.File file = TagLib.File.Create($"{filepath}.{extension}"))
+                            {
+                                file.Tag.Performers = new string[] { video.Author };
+                                file.Tag.Title = video.Title;
+                                file.Save();
+                            }
                         }
 
-                        ConsoleHelper.WriteLine($"Now Downloading: \"{video.Title}\"");
-                        await client.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}").ContinueWith(task => { ConsoleHelper.WriteLine($"Download Finished: \"{video.Title}\""); });
-                        using (TagLib.File file = TagLib.File.Create($"{path}.{extension}"))
-                        {
-                            file.Tag.Performers = new string[] { video.Author };
-                            file.Tag.Title = video.Title;
-                            file.Save();
-                        }
+                        position++;
                     }
 
                     var downloadDuration = DateTime.Now - downloadStart;
@@ -107,6 +112,13 @@ namespace ATCB.Library.Models.Commands.Music
                     GlobalVariables.GlobalPlaylist.LoadFromFolder(playlistDirectory);
                     GlobalVariables.GlobalPlaylist.Shuffle();
                     GlobalVariables.GlobalPlaylist.Reset();
+
+                    if (GlobalVariables.AppSettings.PlaylistLocation == null)
+                    {
+                        GlobalVariables.AppSettings.PlaylistLocation = playlistDirectory;
+                        GlobalVariables.AppSettings.Save();
+                        ConsoleHelper.WriteLine($"Playlist \"{playlist.Title}\" has been saved as default.");
+                    }
                 }
             }
         }
