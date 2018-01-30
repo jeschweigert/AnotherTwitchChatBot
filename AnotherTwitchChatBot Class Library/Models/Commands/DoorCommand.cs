@@ -14,9 +14,9 @@ namespace ATCB.Library.Models.Commands
 
         public override bool IsSynonym(string commandText) => commandText.Equals("door");
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
-            client.SendMessage("Command \"🚪\" was not found.");
+            context.SendMessage("Command \"🚪\" was not found.");
         }
     }
 }

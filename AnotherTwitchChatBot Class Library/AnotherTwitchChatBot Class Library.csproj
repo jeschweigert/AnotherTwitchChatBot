@@ -112,14 +112,14 @@
     <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
     </Reference>
-    <Reference Include="TwitchLib, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\TwitchLib.1.6.0\lib\net452\TwitchLib.dll</HintPath>
+    <Reference Include="TwitchLib, Version=1.6.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\TwitchLib.1.6.1\lib\net452\TwitchLib.dll</HintPath>
     </Reference>
     <Reference Include="WebSocket4Net, Version=0.15.1.10, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocket4Net.0.15.1\lib\net45\WebSocket4Net.dll</HintPath>
     </Reference>
-    <Reference Include="YoutubeExplode, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YoutubeExplode.4.0.0\lib\net45\YoutubeExplode.dll</HintPath>
+    <Reference Include="YoutubeExplode, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\YoutubeExplode.4.1.0-alpha4\lib\net45\YoutubeExplode.dll</HintPath>
     </Reference>
     <Reference Include="YoutubeSearch, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YoutubeSearch.dll.1.1\lib\YoutubeSearch.dll</HintPath>
@@ -129,17 +129,20 @@
     <Compile Include="Helpers\ConsoleCommandEventArgs.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\TimeSpanHelper.cs" />
-    <Compile Include="Models\Commands\8BallCommand.cs" />
+    <Compile Include="Models\Commands\CommandContext.cs" />
+    <Compile Include="Models\Commands\Misc\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
     <Compile Include="Models\Commands\Music\CurrentSongCommand.cs" />
     <Compile Include="Models\Commands\DoorCommand.cs" />
-    <Compile Include="Models\Commands\GiveawayCommand.cs" />
+    <Compile Include="Models\Commands\Misc\GiveawayCommand.cs" />
+    <Compile Include="Models\Commands\Music\PlaylistCommand.cs" />
     <Compile Include="Models\Commands\Music\VolumeCommand.cs" />
     <Compile Include="Models\Commands\Music\PlayCommand.cs" />
     <Compile Include="Models\Commands\Music\PauseCommand.cs" />
     <Compile Include="Models\Commands\Music\SkipCommand.cs" />
     <Compile Include="Models\Commands\Music\SongRequestCommand.cs" />
+    <Compile Include="Models\Commands\Twitch\GameCommand.cs" />
     <Compile Include="Models\Giveaways\FollowerGiveaway.cs" />
     <Compile Include="Models\Giveaways\Giveaway.cs" />
     <Compile Include="Models\Giveaways\SubscriberGiveaway.cs" />
@@ -154,7 +157,6 @@
     <Compile Include="Models\Playlist\SongEnumerator.cs" />
     <Compile Include="Models\Settings\ApplicationSettings.cs" />
     <Compile Include="Models\Twitch\TwitchChatBot.cs" />
-    <Compile Include="Models\Uno\UnoGame.cs" />
     <Compile Include="Models\WebApi\WebAuthenticator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATCB.Library.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,14 +23,11 @@ namespace ATCB.Library.Models.Music
         /// <summary>
         /// Whether or not the song in question has been downloaded yet.
         /// </summary>
-        public bool IsDownloaded { get; internal set; }
+        public bool IsDownloaded { get; internal set; } = false;
 
         private YoutubeClient youtubeClient;
         private Video Video;
-
-        /// <summary>
-        /// Initializes an empty RequestedSong`1 object.
-        /// </summary>
+        
         public RequestedSong()
         {
             youtubeClient = new YoutubeClient();
@@ -38,7 +36,6 @@ namespace ATCB.Library.Models.Music
             Artist = null;
             FilePath = null;
             Requester = null;
-            IsDownloaded = false;
         }
         public RequestedSong(string videoId, string requester)
         {
@@ -48,7 +45,6 @@ namespace ATCB.Library.Models.Music
             Artist = Video.Author;
             FilePath = null;
             Requester = requester;
-            IsDownloaded = false;
         }
 
         /// <summary>
@@ -62,8 +58,8 @@ namespace ATCB.Library.Models.Music
             if (Video == null)
                 return false;
 
-            var fileName = ToSafeFileName(Video.Title);
-            var path = APP_DIRECTORY + "downloads\\" + fileName;
+            var fileName = ToSafeFileName(Video.Id);
+            var path = $"{APP_DIRECTORY}downloads\\{fileName}";
 
             var mediaStreamInfos = await youtubeClient.GetVideoMediaStreamInfosAsync(Video.Id);
             var streamInfo = mediaStreamInfos.Audio.Where(x => x.Container != Container.WebM).First();
@@ -76,10 +72,16 @@ namespace ATCB.Library.Models.Music
                 return true;
             }
 
-            await youtubeClient.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}");
+            ConsoleHelper.WriteLine($"Now Downloading: \"{Video.Title}\"");
+            await youtubeClient.DownloadMediaStreamAsync(streamInfo, $"{path}.{extension}").ContinueWith(task => { OnDownloadCompletion(); });
             FilePath = $"{path}.{extension}";
-            IsDownloaded = true;
             return true;
+        }
+
+        private void OnDownloadCompletion()
+        {
+            ConsoleHelper.WriteLine($"Download Finished: \"{Video.Title}\"");
+            IsDownloaded = true;
         }
 
         private Video TryGetVideo(string videoId)

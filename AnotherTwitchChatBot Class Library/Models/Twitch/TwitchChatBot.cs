@@ -17,6 +17,7 @@ using ATCB.Library.Models.Commands;
 using ATCB.Library.Helpers;
 using TwitchLib.Services;
 using TwitchLib.Events.Services.FollowerService;
+using TwitchLib.Events.Services.LiveStreamMonitor;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -29,6 +30,7 @@ namespace ATCB.Library.Models.Twitch
         private TwitchClient botClient, userClient;
         private TwitchAPI twitchApi;
         private FollowerService followerService;
+        private LiveStreamMonitor liveStreamMonitor;
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
@@ -75,6 +77,7 @@ namespace ATCB.Library.Models.Twitch
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
             followerService = new FollowerService(twitchApi);
+            liveStreamMonitor = new LiveStreamMonitor(twitchApi);
             commandFactory = new CommandFactory();
             speechSynthesizer = new SpeechSynthesizer();
 
@@ -83,6 +86,8 @@ namespace ATCB.Library.Models.Twitch
 
             // TwitchLib Service events
             followerService.OnNewFollowersDetected += OnNewFollowersDetected;
+            liveStreamMonitor.OnStreamOnline += OnStreamOnline;
+            liveStreamMonitor.OnStreamOffline += OnStreamOffline;
 
             // User client events
             userClient.OnConnected += OnUserConnected;
@@ -96,6 +101,10 @@ namespace ATCB.Library.Models.Twitch
             botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
             botClient.OnReSubscriber += OnReSubscriber;
+
+            // Set up TwitchLib services
+            followerService.SetChannelByName(Username);
+            liveStreamMonitor.SetStreamsByUsername(new List<string>(new[] { Username }));
         }
 
         /// <summary>
@@ -105,6 +114,8 @@ namespace ATCB.Library.Models.Twitch
         {
             botClient.Connect();
             userClient.Connect();
+            followerService.StartService();
+            liveStreamMonitor.StartService();
             IsConnected = true;
         }
 
@@ -115,6 +126,8 @@ namespace ATCB.Library.Models.Twitch
         {
             botClient.Disconnect();
             userClient.Disconnect();
+            followerService.StopService();
+            liveStreamMonitor.StopService();
             IsConnected = false;
         }
 
@@ -152,11 +165,11 @@ namespace ATCB.Library.Models.Twitch
             if (command != null)
             {
                 var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                command.Run(context, botClient);
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, true)); }).Start();
             }
             else
             {
-                botClient.SendMessage($"Command \"{commandText}\" was not found.");
+                ConsoleHelper.WriteLine($"Command \"{commandText}\" was not found.");
             }
         }
 
@@ -167,7 +180,18 @@ namespace ATCB.Library.Models.Twitch
             foreach (var follow in e.NewFollowers)
             {
                 speechSynthesizer.SpeakAsync($"Thanks to {follow.User.DisplayName} for following!");
+                botClient.SendMessage($"Thanks to {follow.User.DisplayName} for following!");
             }
+        }
+
+        private void OnStreamOnline(object sender, OnStreamOnlineArgs e)
+        {
+            ConsoleHelper.WriteLine($"ONLINE: {e.Channel} has gone live!");
+        }
+
+        private void OnStreamOffline(object sender, OnStreamOfflineArgs e)
+        {
+            ConsoleHelper.WriteLine($"OFFLINE: {e.Channel} has stopped streaming.");
         }
 
         #endregion
@@ -245,7 +269,7 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                command.Run(e.Command, botClient);
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command)); }).Start();
             }
             else
             {

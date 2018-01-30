@@ -10,7 +10,7 @@ namespace ATCB.Library.Models.Commands
 {
     public abstract class Command
     {
-        public abstract void Run(ChatCommand context, TwitchClient client);
+        public abstract void Run(CommandContext context);
 
         public abstract bool IsSynonym(string commandText);
     }

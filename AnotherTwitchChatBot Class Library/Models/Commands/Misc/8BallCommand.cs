@@ -17,10 +17,10 @@ namespace ATCB.Library.Models.Commands
 
         public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
 
-        public override void Run(ChatCommand context, TwitchClient client)
+        public override void Run(CommandContext context)
         {
             Random random = new Random();
-            client.SendMessage(eightBallResponses[random.Next(eightBallResponses.Length)]);
+            context.SendMessage(eightBallResponses[random.Next(eightBallResponses.Length)]);
         }
     }
 }
