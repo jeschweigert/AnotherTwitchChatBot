@@ -7,6 +7,7 @@ using ATCB.Library.Models.WebApi;
 using Colorful;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace ATCB
         
         private static WebAuthenticator Authenticator;
         private static TwitchChatBot ChatBot;
+        private static SpotifySongTracker Spotify;
 
         private static ApplicationSettings Settings;
 
@@ -38,6 +40,13 @@ namespace ATCB
             }
             Settings = Settings.Load();
             GlobalVariables.AppSettings = Settings;
+
+            if (Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle)) != null)
+            {
+                ConsoleHelper.WriteLine("Hooking into Spotify...");
+                Spotify = new SpotifySongTracker();
+                Spotify.OnSongUpdate += OnSpotifySongChanged;
+            }
 
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
             ChatBot = new TwitchChatBot(Authenticator, Settings.AppState);
@@ -62,6 +71,14 @@ namespace ATCB
 
             ConsoleHelper.WriteLine("Press any key to exit...");
             System.Console.ReadKey(true);
+        }
+
+        private static void OnSpotifySongChanged(string data)
+        {
+            using (StreamWriter writetext = new StreamWriter($"{AppDirectory}current_song.txt"))
+            {
+                writetext.WriteLine($"{data}                    ");
+            }
         }
 
         private static void OnPlaylistSongChanged(object sender, SongChangeEventArgs e)
