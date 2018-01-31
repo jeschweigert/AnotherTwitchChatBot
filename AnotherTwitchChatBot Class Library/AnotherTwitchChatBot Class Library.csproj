@@ -118,6 +118,7 @@
     <Reference Include="WebSocket4Net, Version=0.15.1.10, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
       <HintPath>..\packages\WebSocket4Net.0.15.1\lib\net45\WebSocket4Net.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
     <Reference Include="YoutubeExplode, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\YoutubeExplode.4.1.0-alpha4\lib\net45\YoutubeExplode.dll</HintPath>
     </Reference>
@@ -149,6 +150,7 @@
     <Compile Include="Models\Giveaways\ViewerGiveaway.cs" />
     <Compile Include="Models\Misc\GlobalVariables.cs" />
     <Compile Include="Models\Misc\ReflectiveEnumerator.cs" />
+    <Compile Include="Models\Misc\SpotifySongTracker.cs" />
     <Compile Include="Models\Playlist\PreexistingSong.cs" />
     <Compile Include="Models\Playlist\Song.cs" />
     <Compile Include="Models\Playlist\Playlist.cs" />
