@@ -54,7 +54,7 @@ namespace ATCB
             ChatBot.Start();
             
             GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
-            if (Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
+            if (Spotify != null && Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
             {
                 ConsoleHelper.WriteLine("Loading the playlist...");
                 GlobalVariables.GlobalPlaylist.LoadFromFolder(Settings.PlaylistLocation);
@@ -78,6 +78,7 @@ namespace ATCB
             using (StreamWriter writetext = new StreamWriter($"{AppDirectory}current_song.txt"))
             {
                 writetext.WriteLine($"{data}                    ");
+                ConsoleHelper.WriteLine($"Now Playing: {data}");
             }
         }
 
