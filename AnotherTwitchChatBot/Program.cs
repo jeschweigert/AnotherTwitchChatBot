@@ -46,6 +46,11 @@ namespace ATCB
                 ConsoleHelper.WriteLine("Hooking into Spotify...");
                 Spotify = new SpotifySongTracker();
                 Spotify.OnSongUpdate += OnSpotifySongChanged;
+                var success = Spotify.Connect();
+                if (success)
+                    ConsoleHelper.WriteLine("Connected to Spotify!");
+                else
+                    ConsoleHelper.WriteLine("Failed to connect to Spotify.");
             }
 
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
@@ -54,7 +59,7 @@ namespace ATCB
             ChatBot.Start();
             
             GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
-            if (Spotify != null && Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
+            if (Spotify == null && Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
             {
                 ConsoleHelper.WriteLine("Loading the playlist...");
                 GlobalVariables.GlobalPlaylist.LoadFromFolder(Settings.PlaylistLocation);
@@ -73,12 +78,11 @@ namespace ATCB
             System.Console.ReadKey(true);
         }
 
-        private static void OnSpotifySongChanged(string data)
+        private static void OnSpotifySongChanged(string title, string artist)
         {
             using (StreamWriter writetext = new StreamWriter($"{AppDirectory}current_song.txt"))
             {
-                writetext.WriteLine($"{data}                    ");
-                ConsoleHelper.WriteLine($"Now Playing: {data}");
+                writetext.WriteLine($"{artist} - {title}                    ");
             }
         }
 
