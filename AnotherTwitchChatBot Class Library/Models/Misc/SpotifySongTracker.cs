@@ -1,42 +1,45 @@
-﻿using System;
+﻿using ATCB.Library.Helpers;
+using SpotifyAPI.Local;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace ATCB.Library.Models.Misc
 {
     public class SpotifySongTracker
     {
-        private Timer _timer;
-        private string _currentSong;
+        private SpotifyLocalAPI _spotify;
 
         public SpotifySongTracker()
         {
-            _currentSong = "";
-            _timer = new Timer(GetSpotifyTrackInfo, _currentSong, 0, 500);
+            _spotify = new SpotifyLocalAPI();
+            _spotify.OnTrackChange += OnSpotifyTrackChange;
         }
 
-        public delegate void SongUpdate(string data);
+        public bool Connect()
+        {
+            if (!SpotifyLocalAPI.IsSpotifyRunning())
+                return false;
+            if (_spotify.Connect())
+            {
+                _spotify.ListenForEvents = true;
+                return true;
+            }
+            return false;
+        }
+
+        public delegate void SongUpdate(string title, string artist);
 
         public SongUpdate OnSongUpdate { get; set; }
 
-        private void GetSpotifyTrackInfo(object state)
+        private void OnSpotifyTrackChange(object sender, TrackChangeEventArgs e)
         {
-            var proc = Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle));
-
-            if (proc != null && !string.Equals(proc.MainWindowTitle, "Spotify", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var currentSong = proc.MainWindowTitle;
-                if (currentSong != _currentSong)
-                {
-                    _currentSong = currentSong;
-                    OnSongUpdate(currentSong);
-                }
-            }
+            ConsoleHelper.WriteLine($"Now Playing: {e.NewTrack.ArtistResource.Name} - {e.NewTrack.TrackResource.Name}");
+            OnSongUpdate(e.NewTrack.TrackResource.Name, e.NewTrack.ArtistResource.Name);
         }
     }
 }
