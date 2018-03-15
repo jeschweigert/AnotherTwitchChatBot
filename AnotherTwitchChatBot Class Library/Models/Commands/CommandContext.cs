@@ -30,14 +30,17 @@ namespace ATCB.Library.Models.Commands
 
             // Provide information to the ChatMessageContext
             ChatMessage = new ChatMessageContext();
-            ChatMessage.Bits = context.ChatMessage.Bits;
-            ChatMessage.IsChatBot = fromConsole;
-            ChatMessage.DisplayName = context.ChatMessage.DisplayName;
-            ChatMessage.IsBroadcaster = context.ChatMessage.IsBroadcaster;
-            ChatMessage.IsModerator = context.ChatMessage.IsModerator;
-            ChatMessage.IsModeratorOrBroadcaster = context.ChatMessage.IsBroadcaster || context.ChatMessage.IsModerator;
-            ChatMessage.IsSubscriber = context.ChatMessage.IsSubscriber;
-            ChatMessage.Message = context.ChatMessage.Message;
+            if (context != null)
+            {
+                ChatMessage.Bits = context.ChatMessage.Bits;
+                ChatMessage.IsChatBot = fromConsole;
+                ChatMessage.DisplayName = context.ChatMessage.DisplayName;
+                ChatMessage.IsBroadcaster = context.ChatMessage.IsBroadcaster;
+                ChatMessage.IsModerator = context.ChatMessage.IsModerator;
+                ChatMessage.IsModeratorOrBroadcaster = context.ChatMessage.IsBroadcaster || context.ChatMessage.IsModerator;
+                ChatMessage.IsSubscriber = context.ChatMessage.IsSubscriber;
+                ChatMessage.Message = context.ChatMessage.Message;
+            }
 
             // Provide information to the TwitchStreamContext
             TwitchStream = new TwitchStreamContext();

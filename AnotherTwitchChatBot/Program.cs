@@ -26,7 +26,7 @@ namespace ATCB
         
         private static WebAuthenticator Authenticator;
         private static TwitchChatBot ChatBot;
-        private static SpotifySongTracker Spotify;
+        private static ChatTimer MsgTimer;
 
         private static ApplicationSettings Settings;
 
@@ -41,25 +41,20 @@ namespace ATCB
             Settings = Settings.Load();
             GlobalVariables.AppSettings = Settings;
 
-            if (Process.GetProcessesByName("Spotify").FirstOrDefault(p => !string.IsNullOrWhiteSpace(p.MainWindowTitle)) != null)
-            {
-                ConsoleHelper.WriteLine("Hooking into Spotify...");
-                Spotify = new SpotifySongTracker();
-                Spotify.OnSongUpdate += OnSpotifySongChanged;
-                var success = Spotify.Connect();
-                if (success)
-                    ConsoleHelper.WriteLine("Connected to Spotify!");
-                else
-                    ConsoleHelper.WriteLine("Failed to connect to Spotify.");
-            }
-
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
             ChatBot = new TwitchChatBot(Authenticator, Settings.AppState);
             ConsoleHelper.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
+
+            ConsoleHelper.WriteLine("Loading chat timers...");
+            MsgTimer = new ChatTimer(ChatBot, 900000);
+            if (MsgTimer.Count() > 1)
+            {
+                ConsoleHelper.WriteLine($"{MsgTimer.Count()} timers loaded.");
+            }
             
             GlobalVariables.GlobalPlaylist.OnSongChanged += OnPlaylistSongChanged;
-            if (Spotify == null && Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
+            if (Settings.PlaylistLocation != null && Directory.Exists(Settings.PlaylistLocation))
             {
                 ConsoleHelper.WriteLine("Loading the playlist...");
                 GlobalVariables.GlobalPlaylist.LoadFromFolder(Settings.PlaylistLocation);
@@ -76,14 +71,6 @@ namespace ATCB
 
             ConsoleHelper.WriteLine("Press any key to exit...");
             System.Console.ReadKey(true);
-        }
-
-        private static void OnSpotifySongChanged(string title, string artist)
-        {
-            using (StreamWriter writetext = new StreamWriter($"{AppDirectory}current_song.txt"))
-            {
-                writetext.WriteLine($"{artist} - {title}                    ");
-            }
         }
 
         private static void OnPlaylistSongChanged(object sender, SongChangeEventArgs e)

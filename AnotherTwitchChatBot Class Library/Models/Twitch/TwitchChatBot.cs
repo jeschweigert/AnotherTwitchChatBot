@@ -41,6 +41,7 @@ namespace ATCB.Library.Models.Twitch
         public string Username { get; private set; }
         public string Botname { get; private set; }
         public bool IsConnected { get; private set; } = false;
+        public bool IsLive { get; private set; } = false;
 
         /// <summary>
         /// Initializes a new TwitchChatBot object, which handles all communications between Twitch and the client.
@@ -173,6 +174,14 @@ namespace ATCB.Library.Models.Twitch
             }
         }
 
+        /// <summary>
+        /// Sends a message through the chat bot.
+        /// </summary>
+        public void SendMessage(string message)
+        {
+            botClient.SendMessage(message);
+        }
+
         #region Service Events
         
         private void OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
@@ -186,11 +195,13 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
+            IsLive = true;
             ConsoleHelper.WriteLine($"ONLINE: {e.Channel} has gone live!");
         }
 
         private void OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
+            IsLive = false;
             ConsoleHelper.WriteLine($"OFFLINE: {e.Channel} has stopped streaming.");
         }
 

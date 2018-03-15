@@ -4,6 +4,7 @@ using ATCB.Library.Models.Music;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using TwitchLib;
@@ -44,15 +45,11 @@ namespace ATCB.Library.Models.Commands.Music
                 if (!success)
                 {
                     // Request by YouTube query
-                    var search = new VideoSearch();
-                    var video = search.SearchQuery(context.ArgumentsAsString, 1).Where(x => TimeSpanHelper.ConvertDurationToTimeSpan(x.Duration).TotalMinutes < 8.0).FirstOrDefault();
-                    if (video != null)
+                    // TODO: USE https://beta.decapi.me/youtube/videoid?search=QUERY INSTEAD
+                    using (WebClient client = new WebClient())
                     {
-                        MakeRequest(YoutubeClient.ParseVideoId(video.Url), context);
-                    }
-                    else
-                    {
-                        context.SendMessage("Sorry! I couldn't find a song like the one you wanted!");
+                        videoId = client.DownloadString($"https://beta.decapi.me/youtube/videoid?search={context.ArgumentsAsString}");
+                        MakeRequest(videoId, context);
                     }
                 }
                 else
