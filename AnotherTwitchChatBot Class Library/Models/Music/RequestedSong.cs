@@ -46,6 +46,16 @@ namespace ATCB.Library.Models.Music
             FilePath = null;
             Requester = requester;
         }
+        public RequestedSong(string title, string artist, string requester, string path)
+        {
+            youtubeClient = null;
+            Video = null;
+            Title = title;
+            Artist = artist;
+            FilePath = path;
+            Requester = requester;
+            IsDownloaded = true;
+        }
 
         /// <summary>
         /// Downloads the requested song to the "Downloads" folder, if it hasn't already been downloaded.

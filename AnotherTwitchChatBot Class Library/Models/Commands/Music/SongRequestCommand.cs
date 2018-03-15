@@ -44,12 +44,27 @@ namespace ATCB.Library.Models.Commands.Music
 
                 if (!success)
                 {
-                    // Request by YouTube query
-                    // TODO: USE https://beta.decapi.me/youtube/videoid?search=QUERY INSTEAD
-                    using (WebClient client = new WebClient())
+                    if (context.ArgumentsAsString.Contains("soundcloud.com"))
                     {
-                        videoId = client.DownloadString($"https://beta.decapi.me/youtube/videoid?search={context.ArgumentsAsString}");
-                        MakeRequest(videoId, context);
+                        var song = SCExtractor.Extract(context.ArgumentsAsString);
+                        if (song != null)
+                        {
+                            context.SendMessage($"@{context.ChatMessage.DisplayName} Your request, \"{song.title}\", is #{GlobalVariables.GlobalPlaylist.RequestedSongCount + 1} in the queue!");
+                            GlobalVariables.GlobalPlaylist.Enqueue(new RequestedSong(song.title, song.user.username, context.ChatMessage.DisplayName, $"{AppDomain.CurrentDomain.BaseDirectory}downloads\\{song.title}.{song.original_format}"));
+                        }
+                        else
+                        {
+                            context.SendMessage($"@{context.ChatMessage.DisplayName} Uh oh! I couldn't grab that Soundcloud song.");
+                        }
+                    }
+                    else
+                    {
+                        // Request by YouTube query
+                        using (WebClient client = new WebClient())
+                        {
+                            videoId = client.DownloadString($"https://beta.decapi.me/youtube/videoid?search={context.ArgumentsAsString}");
+                            MakeRequest(videoId, context);
+                        }
                     }
                 }
                 else
