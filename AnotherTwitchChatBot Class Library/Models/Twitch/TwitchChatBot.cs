@@ -93,15 +93,18 @@ namespace ATCB.Library.Models.Twitch
             // User client events
             userClient.OnConnected += OnUserConnected;
             userClient.OnBeingHosted += OnUserBeingHosted;
+            userClient.OnMessageReceived += OnMessageReceived;
+            userClient.OnWhisperReceived += OnWhisperReceived;
             
             // Bot client events
             botClient.OnConnected += OnBotConnected;
             botClient.OnConnectionError += OnBotConnectionError;
-            botClient.OnMessageReceived += OnMessageReceived;
+            //botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnMessageSent += OnBotMessageSent;
             botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
             botClient.OnReSubscriber += OnReSubscriber;
+            botClient.OnGiftedSubscription += OnGiftSubscriber;
 
             // Set up TwitchLib services
             followerService.SetChannelByName(Username);
@@ -220,6 +223,19 @@ namespace ATCB.Library.Models.Twitch
             botClient.SendMessage($"Thanks for the host, @{e.HostedByChannel}!");
         }
 
+        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        {
+            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
+
+            if (e.ChatMessage.Bits > 0)
+                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
+        }
+
+        private void OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
+        {
+            ConsoleHelper.WriteLineWhisper($"[{DateTime.Now.ToString("T")}] {e.WhisperMessage.DisplayName} to {Username}: {e.WhisperMessage.Message}");
+        }
+
         #endregion
 
         #region Bot Events
@@ -232,14 +248,6 @@ namespace ATCB.Library.Models.Twitch
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
         {
             ConsoleHelper.WriteLine($"[ERROR] CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
-        }
-
-        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
-        {
-            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
-
-            if (e.ChatMessage.Bits > 0)
-                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
         }
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
@@ -272,6 +280,12 @@ namespace ATCB.Library.Models.Twitch
             ConsoleHelper.WriteLine($"{e.ReSubscriber.DisplayName} just re-subscribed for {e.ReSubscriber.Months} months!");
             speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
             speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
+        }
+
+        private void OnGiftSubscriber(object sender, OnGiftedSubscriptionArgs e)
+        {
+            ConsoleHelper.WriteLine($"{e.GiftedSubscription.DisplayName} just bought {e.GiftedSubscription.MsgParamRecipientDisplayName} a {e.GiftedSubscription.MsgParamSubPlan} subscription!");
+            speechSynthesizer.SpeakAsync($"Much thanks to {e.GiftedSubscription.DisplayName} for buying {e.GiftedSubscription.MsgParamRecipientDisplayName} a sub!");
         }
 
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)

@@ -22,7 +22,7 @@ namespace ATCB.Library.Helpers
                 Colorful.Console.Write("\b \b");
             }
             Colorful.Console.WriteLine(s, c);
-            Colorful.Console.Write(new string(charBuffer.ToArray()), Color.LightGray);
+            Colorful.Console.Write(new string(charBuffer.ToArray()), Color.DarkGray);
         }
 
         private static void OutputLineAndReplaceConsoleTextStyled(string s, StyleSheet st)
@@ -32,16 +32,16 @@ namespace ATCB.Library.Helpers
                 Colorful.Console.Write("\b \b");
             }
             Colorful.Console.WriteLineStyled(s, st);
-            Colorful.Console.Write(new string(charBuffer.ToArray()), Color.LightGray);
+            Colorful.Console.Write(new string(charBuffer.ToArray()), Color.DarkGray);
         }
 
         public static void WriteLine(string message)
         {
-            WriteLine(message, Color.LightGray);
+            WriteLine(message, Color.DarkGray);
         }
         public static void WriteLine(string message, bool deleteInput)
         {
-            Colorful.Console.WriteLine(message, Color.LightGray);
+            Colorful.Console.WriteLine(message, Color.DarkGray);
         }
         public static void WriteLine(string message, Color color)
         {
@@ -61,6 +61,21 @@ namespace ATCB.Library.Helpers
             }
             else
                 OutputLineAndReplaceConsoleText(message, Color.White);
+        }
+
+        public static void WriteLineWhisper(string message, bool deleteInput = false)
+        {
+            if (deleteInput)
+            {
+                for (int i = 0; i < charBuffer.Count; i++)
+                {
+                    Colorful.Console.Write("\b \b");
+                }
+
+                Colorful.Console.WriteLine(message, Color.DarkGreen);
+            }
+            else
+                OutputLineAndReplaceConsoleText(message, Color.DarkGreen);
         }
 
         public static ConsoleKeyInfo ReadKey()
