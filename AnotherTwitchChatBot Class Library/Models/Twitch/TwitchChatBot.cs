@@ -18,6 +18,7 @@ using ATCB.Library.Helpers;
 using TwitchLib.Services;
 using TwitchLib.Events.Services.FollowerService;
 using TwitchLib.Events.Services.LiveStreamMonitor;
+using ATCB.Library.Models.Misc;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -34,6 +35,7 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
+        private Translator translator;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
@@ -80,6 +82,7 @@ namespace ATCB.Library.Models.Twitch
             followerService = new FollowerService(twitchApi);
             liveStreamMonitor = new LiveStreamMonitor(twitchApi);
             commandFactory = new CommandFactory();
+            translator = new Translator();
             speechSynthesizer = new SpeechSynthesizer();
 
             // ATCB-made events
@@ -99,7 +102,6 @@ namespace ATCB.Library.Models.Twitch
             // Bot client events
             botClient.OnConnected += OnBotConnected;
             botClient.OnConnectionError += OnBotConnectionError;
-            //botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnMessageSent += OnBotMessageSent;
             botClient.OnChatCommandReceived += OnChatCommandReceived;
             botClient.OnNewSubscriber += OnNewSubscriber;
@@ -225,7 +227,16 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] {e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
+            var msg = e.ChatMessage.Message;
+            var lang = (translator.DetectLanguage(msg) == "eng" ? "English" : translator.DetectLanguage(msg)) ?? "N/A";
+            if (lang != "English")
+            {
+                translator.Translate(msg, "auto|en");
+                while (translator.IsComplete != true) { }
+                msg = translator.Result.Text;
+                lang = translator.Result.Language;
+            }
+            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] ({lang}) {e.ChatMessage.DisplayName}: {msg}");
 
             if (e.ChatMessage.Bits > 0)
                 speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
