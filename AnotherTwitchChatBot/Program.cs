@@ -32,6 +32,8 @@ namespace ATCB
 
         static void Main(string[] args)
         {
+            DisableConsoleQuickEdit.Go();
+
             Authenticator = new WebAuthenticator();
             Settings = new ApplicationSettings();
             if (!Settings.Exists())
