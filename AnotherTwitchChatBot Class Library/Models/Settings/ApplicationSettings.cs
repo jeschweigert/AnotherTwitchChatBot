@@ -22,6 +22,8 @@ namespace ATCB.Library.Models.Settings
 
         public string PlaylistLocation { get; set; }
 
+        public bool SongRequests { get; set; }
+
         public ApplicationSettings Load()
         {
             return JsonConvert.DeserializeObject<ApplicationSettings>(File.ReadAllText(Location));

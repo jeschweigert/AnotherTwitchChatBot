@@ -10,9 +10,7 @@ namespace ATCB.Library.Models.Commands
 {
     public class DoorCommand : Command
     {
-        public DoorCommand() { }
-
-        public override bool IsSynonym(string commandText) => commandText.Equals("door");
+        public override string[] Synonyms() { return new string[] { "door" }; }
 
         public override void Run(CommandContext context)
         {

@@ -1,4 +1,5 @@
 ﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Settings;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,15 +20,20 @@ namespace ATCB.Library.Models.Commands
 
         public ChatMessageContext ChatMessage;
         public TwitchStreamContext TwitchStream;
+        public ApplicationSettings Settings;
+        public List<string> Commands { get; private set; }
 
-        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, bool fromConsole = false)
+        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, CommandFactory factory, ApplicationSettings settings, bool fromConsole = false)
         {
             BotClient = botClient;
             UserClient = userClient;
             TwitchApi = twitchApi;
             Context = context;
+            Settings = settings;
             FromConsole = fromConsole;
 
+            Commands = factory.ToList();
+            
             // Provide information to the ChatMessageContext
             ChatMessage = new ChatMessageContext();
             if (context != null)
@@ -47,6 +53,7 @@ namespace ATCB.Library.Models.Commands
             var channel = TwitchApi.Channels.v3.GetChannelByNameAsync(UserClient.TwitchUsername).ConfigureAwait(false).GetAwaiter().GetResult();
             TwitchStream.Game = channel.Game;
             TwitchStream.Title = channel.Status;
+            TwitchStream.Username = UserClient.TwitchUsername;
         }
 
         public List<string> ArgumentsAsList => Context.ArgumentsAsList;
@@ -81,7 +88,7 @@ namespace ATCB.Library.Models.Commands
         {
             public string Game { get; set; }
             public string Title { get; set; }
-            public DateTime Uptime { get; set; }
+            public string Username { get; set; }
         }
     }
 }

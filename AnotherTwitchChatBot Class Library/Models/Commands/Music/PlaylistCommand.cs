@@ -13,7 +13,7 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class PlaylistCommand : Command
     {
-        public override bool IsSynonym(string commandText) => commandText == "playlist";
+        public override string[] Synonyms() { return new string[] { "playlist" }; }
 
         public override void Run(CommandContext context)
         {
@@ -31,9 +31,6 @@ namespace ATCB.Library.Models.Commands.Music
                             break;
                         case "shuffle":
                             GlobalVariables.GlobalPlaylist.Shuffle();
-                            break;
-                        case "togglereq":
-                            GlobalVariables.GlobalPlaylist.ToggleRequests();
                             break;
                         case "import":
                             ImportAsync(context.ArgumentsAsList);

@@ -35,17 +35,22 @@ namespace ATCB.Library.Helpers
             Colorful.Console.Write(new string(charBuffer.ToArray()), Color.DarkGray);
         }
 
+        private static string Timestamp(string text)
+        {
+            return $"[{DateTime.Now.ToString("T")}] {text}";
+        }
+
         public static void WriteLine(string message)
         {
             WriteLine(message, Color.DarkGray);
         }
         public static void WriteLine(string message, bool deleteInput)
         {
-            Colorful.Console.WriteLine(message, Color.DarkGray);
+            Colorful.Console.WriteLine(Timestamp(message), Color.DarkGray);
         }
         public static void WriteLine(string message, Color color)
         {
-            OutputLineAndReplaceConsoleText(message, color);
+            OutputLineAndReplaceConsoleText(Timestamp(message), color);
         }
 
         public static void WriteLineChat(string message, bool deleteInput = false)
@@ -57,10 +62,10 @@ namespace ATCB.Library.Helpers
                     Colorful.Console.Write("\b \b");
                 }
 
-                Colorful.Console.WriteLine(message, Color.White);
+                Colorful.Console.WriteLine(Timestamp(message), Color.White);
             }
             else
-                OutputLineAndReplaceConsoleText(message, Color.White);
+                OutputLineAndReplaceConsoleText(Timestamp(message), Color.White);
         }
 
         public static void WriteLineWhisper(string message, bool deleteInput = false)
@@ -72,10 +77,10 @@ namespace ATCB.Library.Helpers
                     Colorful.Console.Write("\b \b");
                 }
 
-                Colorful.Console.WriteLine(message, Color.DarkGreen);
+                Colorful.Console.WriteLine(Timestamp(message), Color.DarkGreen);
             }
             else
-                OutputLineAndReplaceConsoleText(message, Color.DarkGreen);
+                OutputLineAndReplaceConsoleText(Timestamp(message), Color.DarkGreen);
         }
 
         public static ConsoleKeyInfo ReadKey()
@@ -88,7 +93,7 @@ namespace ATCB.Library.Helpers
                     lock (locker)
                     {
                         var sentMessage = new string(charBuffer.ToArray());
-                        WriteLineChat($"[{DateTime.Now.ToString("T")}] Console: !{sentMessage}", true);
+                        WriteLineChat($"Console: !{sentMessage}", true);
 
                         charBuffer.Clear();
                         Task.Run(() => { OnConsoleCommand(null, new ConsoleCommandEventArgs(sentMessage)); });

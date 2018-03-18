@@ -12,11 +12,7 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class CurrentSongCommand : Command
     {
-        private string[] synonyms = { "song", "currentsong" };
-
-        public CurrentSongCommand() { }
-
-        public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
+        public override string[] Synonyms() { return new string[] { "song", "currentsong" }; }
 
         public override void Run(CommandContext context)
         {

@@ -44,7 +44,7 @@ namespace ATCB
             GlobalVariables.AppSettings = Settings;
 
             ConsoleHelper.WriteLine("Grabbing credentials from database...");
-            ChatBot = new TwitchChatBot(Authenticator, Settings.AppState);
+            ChatBot = new TwitchChatBot(Authenticator, Settings.AppState, Settings);
             ConsoleHelper.WriteLine("Connecting to Twitch...");
             ChatBot.Start();
 

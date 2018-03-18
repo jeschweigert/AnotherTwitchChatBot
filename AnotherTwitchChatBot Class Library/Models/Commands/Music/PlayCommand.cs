@@ -11,16 +11,18 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class PlayCommand : Command
     {
-        public PlayCommand() { }
-
-        public override bool IsSynonym(string commandText) => commandText.Equals("play");
+        public override string[] Synonyms() { return new string[] { "play" }; }
 
         public override void Run(CommandContext context)
         {
-            if (context.ChatMessage.IsBroadcaster || context.ChatMessage.IsChatBot)
+            if (context.ChatMessage.IsChatBot)
             {
                 GlobalVariables.GlobalPlaylist.Play();
                 context.SendMessage("The playlist is now playing.");
+            }
+            else
+            {
+                context.SendMessage("The !play command can only be used from within the console itself.");
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATCB.Library.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace ATCB.Library.Models.Giveaways
             if (!RaffleNames.Contains(name) && allowEntries)
             {
                 RaffleNames.Add(name);
-                Console.WriteLine($"Added \"{name}\" to the giveaway.");
+                ConsoleHelper.WriteLine($"Added \"{name}\" to the giveaway.");
             }
         }
 

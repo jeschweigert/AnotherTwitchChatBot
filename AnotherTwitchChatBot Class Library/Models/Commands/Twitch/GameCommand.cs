@@ -8,7 +8,7 @@ namespace ATCB.Library.Models.Commands.Twitch
 {
     public class GameCommand : Command
     {
-        public override bool IsSynonym(string commandText) => commandText == "game";
+        public override string[] Synonyms() { return new string[] { "game", "currentgame" }; }
 
         public override void Run(CommandContext context)
         {

@@ -44,11 +44,6 @@ namespace ATCB.Library.Models.Music
         public int RequestedSongCount => RequestedSongs.Count;
 
         /// <summary>
-        /// Whether or not the playlist is set to accept song requests.
-        /// </summary>
-        public bool AcceptRequests { get; private set; } = true;
-
-        /// <summary>
         /// The song that's currently being played.
         /// </summary>
         public Song CurrentSong { get; private set; }
@@ -109,11 +104,6 @@ namespace ATCB.Library.Models.Music
                 current = Songs.Count() - 1;
                 return Songs[current];
             }
-        }
-
-        public void ToggleRequests()
-        {
-            AcceptRequests = !AcceptRequests;
         }
 
         /// <summary>

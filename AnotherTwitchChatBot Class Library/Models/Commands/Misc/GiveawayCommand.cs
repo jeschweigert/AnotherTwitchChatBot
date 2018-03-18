@@ -11,12 +11,9 @@ namespace ATCB.Library.Models.Commands
 {
     public class GiveawayCommand : Command
     {
-        private string[] synonyms = { "giveaway" };
         private Giveaway giveaway;
 
-        public GiveawayCommand() { }
-
-        public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
+        public override string[] Synonyms() { return new string[] { "giveaway" }; }
 
         public override void Run(CommandContext context)
         {

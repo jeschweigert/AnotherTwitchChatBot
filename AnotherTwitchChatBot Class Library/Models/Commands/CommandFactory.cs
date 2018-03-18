@@ -1,4 +1,5 @@
-﻿using ATCB.Library.Models.Misc;
+﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Misc;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ namespace ATCB.Library.Models.Commands
             // Check to see if plugins folder exists, then try loading
             if (Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}plugins"))
             {
-                Console.WriteLine("Plugins folder found, attempting to load...");
+                ConsoleHelper.WriteLine("Plugins folder found, attempting to load...");
                 var directoryInfo = new DirectoryInfo($"{AppDomain.CurrentDomain.BaseDirectory}plugins");
                 int pluginCount = 0;
                 foreach (var plugin in directoryInfo.GetFiles("*.dll"))
@@ -36,7 +37,7 @@ namespace ATCB.Library.Models.Commands
                     pluginCount++;
                 }
 
-                Console.WriteLine($"Added {pluginCount} plugin(s).");
+                ConsoleHelper.WriteLine($"Added {pluginCount} plugin(s).");
             }
 
             var commandsEnum = ReflectiveEnumerator.GetEnumerableOfType<Command>();
@@ -45,12 +46,22 @@ namespace ATCB.Library.Models.Commands
                 Commands.Add(c);
             }
 
-            Console.WriteLine($"Added {Commands.Count} command(s).");
+            ConsoleHelper.WriteLine($"Added {Commands.Count} command(s).");
         }
 
         public Command GetCommand(string commandName)
         {
-            return Commands.Where(x => x.IsSynonym(commandName)).FirstOrDefault();
+            return Commands.Where(x => x.Synonyms().Contains(commandName)).FirstOrDefault();
+        }
+
+        public List<string> ToList()
+        {
+            List<string> commands = new List<string>();
+            foreach (var command in Commands)
+            {
+                commands.Add(command.Synonyms()[0]);
+            }
+            return commands.OrderBy(x => x).ToList();
         }
     }
 }

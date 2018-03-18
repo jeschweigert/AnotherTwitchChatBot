@@ -10,12 +10,9 @@ namespace ATCB.Library.Models.Commands
 {
     public class _8BallCommand : Command
     {
-        private string[] synonyms = { "8ball" };
-        private static string[] eightBallResponses = { "Signs point to yes.", "Yes.", "Reply hazy, try again.", "My sources say no.", "You may rely on it.", "Concentrate and ask again.", "Outlook not so good.", "It is decidedly so.", "Better not tell you now.", "Very doubtful.", "Yes - definitely.", "It is certain.", "Cannot predict now.", "Most likely.", "Ask again later.", "My reply is no.", "Outlook good.", "Don't count on it." };
+        private readonly string[] eightBallResponses = { "Signs point to yes.", "Yes.", "Reply hazy, try again.", "My sources say no.", "You may rely on it.", "Concentrate and ask again.", "Outlook not so good.", "It is decidedly so.", "Better not tell you now.", "Very doubtful.", "Yes - definitely.", "It is certain.", "Cannot predict now.", "Most likely.", "Ask again later.", "My reply is no.", "Outlook good.", "Don't count on it." };
 
-        public _8BallCommand() { }
-
-        public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
+        public override string[] Synonyms() { return new string[] { "8ball" }; }
 
         public override void Run(CommandContext context)
         {

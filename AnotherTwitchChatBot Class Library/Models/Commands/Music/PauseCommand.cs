@@ -11,16 +11,18 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class PauseCommand : Command
     {
-        public PauseCommand() { }
-
-        public override bool IsSynonym(string commandText) => commandText.Equals("pause");
+        public override string[] Synonyms() { return new string[] { "pause" }; }
 
         public override void Run(CommandContext context)
         {
-            if (context.ChatMessage.IsBroadcaster || context.ChatMessage.IsChatBot)
+            if (context.ChatMessage.IsChatBot)
             {
                 GlobalVariables.GlobalPlaylist.Pause();
                 context.SendMessage("The playlist has been paused.");
+            }
+            else
+            {
+                context.SendMessage("The !settings command can only be used from within the console itself.");
             }
         }
     }

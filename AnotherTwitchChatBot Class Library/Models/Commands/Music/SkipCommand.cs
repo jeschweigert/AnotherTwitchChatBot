@@ -11,14 +11,15 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class SkipCommand : Command
     {
-        public SkipCommand() { }
-
-        public override bool IsSynonym(string commandText) => commandText.Equals("skip");
+        public override string[] Synonyms() { return new string[] { "skip", "veto" }; }
 
         public override void Run(CommandContext context)
         {
             if (context.ChatMessage.IsModeratorOrBroadcaster)
+            {
                 GlobalVariables.GlobalPlaylist.Skip();
+                context.SendMessage($"@{context.ChatMessage.DisplayName} Song skipped.");
+            }
         }
     }
 }

@@ -11,15 +11,13 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class VolumeCommand : Command
     {
-        public VolumeCommand() { }
-
-        public override bool IsSynonym(string commandText) => commandText.Equals("volume");
+        public override string[] Synonyms() { return new string[] { "volume" }; }
 
         public override void Run(CommandContext context)
         {
-            if (!context.ChatMessage.IsBroadcaster && !context.ChatMessage.IsChatBot)
+            if (!context.ChatMessage.IsChatBot)
             {
-                context.SendMessage("Only the broadcaster has permission to change the volume.");
+                context.SendMessage("The !volume command can only be used from within the console itself.");
                 return;
             }
 

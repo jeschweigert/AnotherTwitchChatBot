@@ -12,6 +12,6 @@ namespace ATCB.Library.Models.Commands
     {
         public abstract void Run(CommandContext context);
 
-        public abstract bool IsSynonym(string commandText);
+        public abstract string[] Synonyms();
     }
 }

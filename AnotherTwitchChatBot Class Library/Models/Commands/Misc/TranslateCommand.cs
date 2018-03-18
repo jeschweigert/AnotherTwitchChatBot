@@ -9,7 +9,7 @@ namespace ATCB.Library.Models.Commands.Misc
 {
     public class TranslateCommand : Command
     {
-        public override bool IsSynonym(string commandText) => commandText.Equals("translate");
+        public override string[] Synonyms() { return new string[] { "translate" }; }
 
         public override void Run(CommandContext context)
         {

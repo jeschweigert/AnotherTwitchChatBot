@@ -16,7 +16,6 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class SongRequestCommand : Command
     {
-        private string[] synonyms = { "songrequest", "sr", "songreq" };
         private YoutubeClient client;
 
         public SongRequestCommand()
@@ -24,11 +23,11 @@ namespace ATCB.Library.Models.Commands.Music
             client = new YoutubeClient();
         }
 
-        public override bool IsSynonym(string commandText) => synonyms.Contains(commandText);
+        public override string[] Synonyms() { return new string[] { "songrequest", "sr", "songreq" }; }
 
         public override void Run(CommandContext context)
         {
-            if (!GlobalVariables.GlobalPlaylist.AcceptRequests)
+            if (!context.Settings.SongRequests)
             {
                 context.SendMessage("Requests aren't being taken at the moment, sorry!");
                 return;

@@ -157,7 +157,9 @@
     <Compile Include="Models\Commands\Music\PauseCommand.cs" />
     <Compile Include="Models\Commands\Music\SkipCommand.cs" />
     <Compile Include="Models\Commands\Music\SongRequestCommand.cs" />
+    <Compile Include="Models\Commands\SettingsCommand.cs" />
     <Compile Include="Models\Commands\Twitch\GameCommand.cs" />
+    <Compile Include="Models\Commands\Twitch\UptimeCommand.cs" />
     <Compile Include="Models\Giveaways\FollowerGiveaway.cs" />
     <Compile Include="Models\Giveaways\Giveaway.cs" />
     <Compile Include="Models\Giveaways\SubscriberGiveaway.cs" />
