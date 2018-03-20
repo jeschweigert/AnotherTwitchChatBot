@@ -59,7 +59,10 @@ namespace ATCB.Library.Models.Commands
             List<string> commands = new List<string>();
             foreach (var command in Commands)
             {
-                commands.Add(command.Synonyms()[0]);
+                if (command.ContainsSeveralCommands)
+                    commands.AddRange(command.Synonyms());
+                else
+                    commands.Add(command.Synonyms()[0]);
             }
             return commands.OrderBy(x => x).ToList();
         }

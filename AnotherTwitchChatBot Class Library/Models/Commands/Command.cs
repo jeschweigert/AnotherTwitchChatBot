@@ -10,8 +10,10 @@ namespace ATCB.Library.Models.Commands
 {
     public abstract class Command
     {
-        public abstract void Run(CommandContext context);
+        public bool ContainsSeveralCommands = false;
 
         public abstract string[] Synonyms();
+
+        public abstract void Run(CommandContext context);
     }
 }
