@@ -38,7 +38,7 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
-        private Translator translator;
+        //private Translator translator;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
@@ -87,7 +87,6 @@ namespace ATCB.Library.Models.Twitch
             followerService = new FollowerService(twitchApi);
             liveStreamMonitor = new LiveStreamMonitor(twitchApi);
             commandFactory = new CommandFactory();
-            translator = new Translator();
             speechSynthesizer = new SpeechSynthesizer();
 
             // ATCB-made events
@@ -102,12 +101,12 @@ namespace ATCB.Library.Models.Twitch
             userClient.OnConnected += OnUserConnected;
             userClient.OnConnectionError += OnUserConnectionError;
             userClient.OnBeingHosted += OnUserBeingHosted;
-            userClient.OnMessageReceived += OnMessageReceived;
             userClient.OnWhisperReceived += OnWhisperReceived;
             
             // Bot client events
             botClient.OnConnected += OnBotConnected;
             botClient.OnConnectionError += OnBotConnectionError;
+            botClient.OnMessageReceived += OnMessageReceived;
             botClient.OnUserJoined += OnJoined;
             botClient.OnUserLeft += OnLeft;
             botClient.OnMessageSent += OnBotMessageSent;
@@ -238,26 +237,6 @@ namespace ATCB.Library.Models.Twitch
             botClient.SendMessage($"Thanks for the host, @{e.HostedByChannel}!");
         }
 
-        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
-        {
-            if (e.ChatMessage.DisplayName.ToLower() != Botname.ToLower())
-            {
-                var msg = e.ChatMessage.Message;
-                var lang = (translator.DetectLanguage(msg) == "eng" ? "English" : translator.DetectLanguage(msg)) ?? "N/A";
-                if (lang != "English")
-                {
-                    translator.Translate(msg, "auto|en");
-                    while (translator.IsComplete != true) { }
-                    msg = translator.Result.Text;
-                    lang = translator.Result.Language;
-                }
-                ConsoleHelper.WriteLineChat($"({lang}) {e.ChatMessage.DisplayName}: {msg}");
-            }
-
-            if (e.ChatMessage.Bits > 0)
-                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
-        }
-
         private void OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
         {
             ConsoleHelper.WriteLineWhisper($"{e.WhisperMessage.DisplayName} to {Username}: {e.WhisperMessage.Message}");
@@ -277,6 +256,14 @@ namespace ATCB.Library.Models.Twitch
             ConsoleHelper.WriteLine($"[ERROR] BOT CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
         }
 
+        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        {
+            ConsoleHelper.WriteLineChat($"{e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
+
+            if (e.ChatMessage.Bits > 0)
+                speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
+        }
+
         private void OnJoined(object sender, OnUserJoinedArgs e)
         {
             ConsoleHelper.WriteLine($"{e.Username} joined the chat.");
@@ -289,7 +276,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnBotMessageSent(object sender, OnMessageSentArgs e)
         {
-            ConsoleHelper.WriteLineChat($"[{DateTime.Now.ToString("T")}] (English) {e.SentMessage.DisplayName}: {e.SentMessage.Message}");
+            ConsoleHelper.WriteLineChat($"{e.SentMessage.DisplayName}: {e.SentMessage.Message}");
         }
 
         private void OnNewSubscriber(object sender, OnNewSubscriberArgs e)

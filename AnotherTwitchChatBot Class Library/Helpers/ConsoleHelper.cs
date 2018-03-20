@@ -15,6 +15,11 @@ namespace ATCB.Library.Helpers
 
         public static EventHandler OnConsoleCommand;
 
+        private static string Consolify(string text)
+        {
+            return Timestamp(HiraganaToRomaji(text));
+        }
+
         private static void OutputLineAndReplaceConsoleText(string s, Color c)
         {
             for (int i = 0; i < charBuffer.Count; i++)
@@ -46,11 +51,11 @@ namespace ATCB.Library.Helpers
         }
         public static void WriteLine(string message, bool deleteInput)
         {
-            Colorful.Console.WriteLine(Timestamp(message), Color.DarkGray);
+            Colorful.Console.WriteLine(Consolify(message), Color.DarkGray);
         }
         public static void WriteLine(string message, Color color)
         {
-            OutputLineAndReplaceConsoleText(Timestamp(message), color);
+            OutputLineAndReplaceConsoleText(Consolify(message), color);
         }
 
         public static void WriteLineChat(string message, bool deleteInput = false)
@@ -62,10 +67,10 @@ namespace ATCB.Library.Helpers
                     Colorful.Console.Write("\b \b");
                 }
 
-                Colorful.Console.WriteLine(Timestamp(message), Color.White);
+                Colorful.Console.WriteLine(Consolify(message), Color.White);
             }
             else
-                OutputLineAndReplaceConsoleText(Timestamp(message), Color.White);
+                OutputLineAndReplaceConsoleText(Consolify(message), Color.White);
         }
 
         public static void WriteLineWhisper(string message, bool deleteInput = false)
@@ -77,10 +82,10 @@ namespace ATCB.Library.Helpers
                     Colorful.Console.Write("\b \b");
                 }
 
-                Colorful.Console.WriteLine(Timestamp(message), Color.DarkGreen);
+                Colorful.Console.WriteLine(Consolify(message), Color.DarkGreen);
             }
             else
-                OutputLineAndReplaceConsoleText(Timestamp(message), Color.DarkGreen);
+                OutputLineAndReplaceConsoleText(Consolify(message), Color.DarkGreen);
         }
 
         public static ConsoleKeyInfo ReadKey()
@@ -114,6 +119,73 @@ namespace ATCB.Library.Helpers
                 }
             }
             return key;
+        }
+
+        private static string HiraganaToRomaji(string text)
+        {
+            string toReturn = "";
+            foreach (char c in text)
+            {
+                if (c == 'わ')
+                    toReturn += "wa";
+                else if (c == 'ら')
+                    toReturn += "ra";
+                else if (c == 'や')
+                    toReturn += "ya";
+                else if (c == 'ま')
+                    toReturn += "ma";
+                else if (c == 'は')
+                    toReturn += "ha";
+                else if (c == 'な')
+                    toReturn += "na";
+                else if (c == 'た')
+                    toReturn += "ta";
+                else if (c == 'さ')
+                    toReturn += "sa";
+                else if (c == 'か')
+                    toReturn += "ka";
+                else if (c == 'あ')
+                    toReturn += "a";
+                else if (c == 'ゐ')
+                    toReturn += "wi";
+                else if (c == 'り')
+                    toReturn += "ri";
+                else if (c == 'み')
+                    toReturn += "mi";
+                else if (c == 'ひ')
+                    toReturn += "hi";
+                else if (c == 'に')
+                    toReturn += "ni";
+                else if (c == 'ち')
+                    toReturn += "chi";
+                else if (c == 'し')
+                    toReturn += "shi";
+                else if (c == 'き')
+                    toReturn += "ki";
+                else if (c == 'い')
+                    toReturn += "i";
+                else if (c == 'る')
+                    toReturn += "ru";
+                else if (c == 'ゆ')
+                    toReturn += "yu";
+                else if (c == 'む')
+                    toReturn += "mu";
+                else if (c == 'ふ')
+                    toReturn += "fu";
+                else if (c == 'ぬ')
+                    toReturn += "nu";
+                else if (c == 'つ')
+                    toReturn += "tsu";
+                else if (c == 'す')
+                    toReturn += "su";
+                else if (c == 'く')
+                    toReturn += "ku";
+                else if (c == 'う')
+                    toReturn += "u"; // todo: add the rest lol
+                else
+                    toReturn += c;
+            }
+            return toReturn;
         }
     }
 }

@@ -147,7 +147,6 @@
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />
     <Compile Include="Models\Commands\Misc\CommandsCommand.cs" />
-    <Compile Include="Models\Commands\Misc\TranslateCommand.cs" />
     <Compile Include="Models\Commands\Music\CurrentSongCommand.cs" />
     <Compile Include="Models\Commands\DoorCommand.cs" />
     <Compile Include="Models\Commands\Misc\GiveawayCommand.cs" />
