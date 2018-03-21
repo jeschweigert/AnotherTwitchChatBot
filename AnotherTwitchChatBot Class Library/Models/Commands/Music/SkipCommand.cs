@@ -17,8 +17,8 @@ namespace ATCB.Library.Models.Commands.Music
         {
             if (context.ChatMessage.IsModeratorOrBroadcaster)
             {
-                GlobalVariables.GlobalPlaylist.Skip();
                 context.SendMessage($"@{context.ChatMessage.DisplayName} Song skipped.");
+                GlobalVariables.GlobalPlaylist.Skip();
             }
         }
     }

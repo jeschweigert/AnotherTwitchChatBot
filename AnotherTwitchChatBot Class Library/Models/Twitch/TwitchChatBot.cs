@@ -258,7 +258,12 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            ConsoleHelper.WriteLineChat($"{e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
+            var badges = "";
+            if (e.ChatMessage.IsModerator)
+                badges += "[M] ";
+            if (e.ChatMessage.IsSubscriber)
+                badges += "[S] ";
+            ConsoleHelper.WriteLineChat($"{badges}{e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
 
             if (e.ChatMessage.Bits > 0)
                 speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");

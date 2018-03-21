@@ -35,6 +35,21 @@ namespace ATCB.Library.Models.Commands
                         context.Settings.Save();
                     }
                 }
+                else if (context.ArgumentsAsList[0] == "sfx")
+                {
+                    if (context.ArgumentsAsList[1] == "enable")
+                    {
+                        context.SendMessage("Sound effects have been enabled.");
+                        context.Settings.SoundEffects = true;
+                        context.Settings.Save();
+                    }
+                    else if (context.ArgumentsAsList[1] == "disable")
+                    {
+                        context.SendMessage("Sound effects have been disabled.");
+                        context.Settings.SoundEffects = false;
+                        context.Settings.Save();
+                    }
+                }
             }
         }
     }
