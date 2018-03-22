@@ -23,7 +23,10 @@ namespace ATCB.Library.Models.Settings
         public string PlaylistLocation { get; set; }
 
         public bool SongRequests { get; internal set; }
+
         public bool SoundEffects { get; internal set; }
+
+        public bool Discord { get; set; }
 
         public ApplicationSettings Load()
         {

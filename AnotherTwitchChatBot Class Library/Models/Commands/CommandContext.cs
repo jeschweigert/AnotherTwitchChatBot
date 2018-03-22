@@ -1,5 +1,7 @@
 ﻿using ATCB.Library.Helpers;
+using ATCB.Library.Models.Discord;
 using ATCB.Library.Models.Settings;
+using Discord;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,22 +16,25 @@ namespace ATCB.Library.Models.Commands
     public class CommandContext
     {
         private TwitchClient BotClient, UserClient;
+        internal DiscordChatBot DiscordClient;
         private TwitchAPI TwitchApi;
         private ChatCommand Context;
         private bool FromConsole;
 
         public ChatMessageContext ChatMessage;
         public TwitchStreamContext TwitchStream;
+        public DiscordContext Discord;
         public ApplicationSettings Settings;
         public List<string> Commands { get; private set; }
 
-        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, CommandFactory factory, ApplicationSettings settings, bool fromConsole = false)
+        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, CommandFactory factory, ApplicationSettings settings, DiscordChatBot discord, bool fromConsole = false)
         {
             BotClient = botClient;
             UserClient = userClient;
             TwitchApi = twitchApi;
             Context = context;
             Settings = settings;
+            DiscordClient = discord;
             FromConsole = fromConsole;
 
             Commands = factory.ToList();
@@ -54,6 +59,10 @@ namespace ATCB.Library.Models.Commands
             TwitchStream.Game = channel.Game;
             TwitchStream.Title = channel.Status;
             TwitchStream.Username = UserClient.TwitchUsername;
+
+            // Provide information to the DiscordContext
+            Discord = new DiscordContext();
+            Discord.State = discord.GetConnectionState();
         }
 
         public List<string> ArgumentsAsList => Context.ArgumentsAsList;
@@ -70,6 +79,11 @@ namespace ATCB.Library.Models.Commands
                 ConsoleHelper.WriteLine(message);
             else
                 BotClient.SendMessage(message);
+        }
+
+        public void ConnectDiscord()
+        {
+            DiscordClient.StartAsync();
         }
 
         public class ChatMessageContext
@@ -89,6 +103,11 @@ namespace ATCB.Library.Models.Commands
             public string Game { get; set; }
             public string Title { get; set; }
             public string Username { get; set; }
+        }
+
+        public class DiscordContext
+        {
+            public ConnectionState State { get; set; }
         }
     }
 }

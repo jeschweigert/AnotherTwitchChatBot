@@ -19,6 +19,18 @@ namespace ATCB.Library.Models.WebApi
             HttpClient = new HttpClient();
         }
 
+        public async Task<AuthenticationDetails> GetUserAuthenticationDetails(Guid state)
+        {
+            var url = $"{baseUrl}get_clientinfo.php?state={state.ToString()}";
+            var response = await HttpClient.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+                return JsonConvert.DeserializeObject<AuthenticationDetails>(await response.Content.ReadAsStringAsync());
+            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                throw new Exception("Could not obtain auth details. Check if client secret is valid.");
+            else
+                throw new Exception("Could not obtain auth details. Check if state is correct or if database is down.");
+        }
+
         /// <summary>
         /// Grabs the relevant access token from the database using a related app state.
         /// </summary>

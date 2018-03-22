@@ -20,6 +20,8 @@ using TwitchLib.Events.Services.FollowerService;
 using TwitchLib.Events.Services.LiveStreamMonitor;
 using ATCB.Library.Models.Misc;
 using ATCB.Library.Models.Settings;
+using ATCB.Library.Models.Discord;
+using Discord.Net;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -38,7 +40,7 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
-        //private Translator translator;
+        private DiscordChatBot discord;
 
         private Guid appState;
         private string userAccessToken, botAccessToken;
@@ -62,22 +64,23 @@ namespace ATCB.Library.Models.Twitch
             twitchApi = new TwitchAPI(ClientId);
 
             // Retrieve access tokens and usernames for logging in
-            userAccessToken = authenticator.GetAccessTokenByStateAsync(appState).Result;
-            botAccessToken = authenticator.GetBotAccessTokenByValidStateAsync(appState).Result;
-            Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
+            var authDetails = authenticator.GetUserAuthenticationDetails(appState).Result;
+            userAccessToken = authDetails.UserDetails.AccessToken;
+            botAccessToken = authDetails.BotDetails.AccessToken;
+            Username = authDetails.UserDetails.Username;
             Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
 
             // If the either of the usernames are blank, then we have to refresh the tokens.
             if (string.IsNullOrEmpty(Username))
             {
                 ConsoleHelper.WriteLine("Refreshing user access token...");
-                userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken).Result;
+                userAccessToken = RefreshAccessToken(appState, ClientId, userAccessToken, authDetails.UserDetails.RefreshToken, authDetails.ClientSecret).Result;
                 Username = authenticator.GetUsernameFromOAuthAsync(userAccessToken).Result;
             }
             if (string.IsNullOrEmpty(Botname))
             {
                 ConsoleHelper.WriteLine("Refreshing bot access token...");
-                botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken).Result;
+                botAccessToken = RefreshAccessToken(BotState, ClientId, botAccessToken, authDetails.BotDetails.RefreshToken, authDetails.ClientSecret).Result;
                 Botname = authenticator.GetUsernameFromOAuthAsync(botAccessToken).Result;
             }
 
@@ -87,7 +90,21 @@ namespace ATCB.Library.Models.Twitch
             followerService = new FollowerService(twitchApi);
             liveStreamMonitor = new LiveStreamMonitor(twitchApi);
             commandFactory = new CommandFactory();
+            discord = new DiscordChatBot(authDetails.DiscordDetails);
             speechSynthesizer = new SpeechSynthesizer();
+
+            // Connect to Discord
+            if (settings.Discord)
+            {
+                try
+                {
+                    discord.StartAsync().GetAwaiter().GetResult();
+                }
+                catch (HttpException e)
+                {
+
+                }
+            }
 
             // ATCB-made events
             ConsoleHelper.OnConsoleCommand += (sender, e) => { PerformConsoleCommand((e as ConsoleCommandEventArgs).Message); };
@@ -151,15 +168,15 @@ namespace ATCB.Library.Models.Twitch
         /// <param name="clientId">The client ID.</param>
         /// <param name="oldAccessToken">The expired access token.</param>
         /// <returns>The refreshed access token.</returns>
-        public async Task<string> RefreshAccessToken(Guid state, string clientId, string oldAccessToken)
+        public async Task<string> RefreshAccessToken(Guid state, string clientId, string oldAccessToken, string refreshToken = null, string clientSecret = null)
         {
-            string refreshToken, clientSecret;
-
             // First, we have to get the refresh token
-            refreshToken = await authenticator.GetRefreshTokenByStateAsync(state);
+            if (refreshToken != null)
+                refreshToken = await authenticator.GetRefreshTokenByStateAsync(state);
 
             // Next, we have to get the client secret
-            clientSecret = await authenticator.GetClientSecretByValidStateAsync(state);
+            if (clientSecret != null)
+                clientSecret = await authenticator.GetClientSecretByValidStateAsync(state);
 
             // Okay, now let's make our POST request to Twitch
             var refreshResponse = await twitchApi.Auth.v5.RefreshAuthTokenAsync(refreshToken, clientSecret, clientId);
@@ -178,7 +195,7 @@ namespace ATCB.Library.Models.Twitch
             if (command != null)
             {
                 var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, commandFactory, Settings, true)); }).Start();
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, commandFactory, Settings, discord, true)); }).Start();
             }
             else
             {
@@ -323,7 +340,7 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command, commandFactory, Settings)); }).Start();
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command, commandFactory, Settings, discord)); }).Start();
             }
             else
             {
