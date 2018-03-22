@@ -26,7 +26,9 @@ namespace ATCB.Library.Models.Settings
 
         public bool SoundEffects { get; internal set; }
 
-        public bool Discord { get; set; }
+        public bool DiscordSetup { get; set; }
+
+        public ulong DiscordChannel { get; set; }
 
         public ApplicationSettings Load()
         {

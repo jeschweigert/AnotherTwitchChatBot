@@ -1,5 +1,5 @@
 ﻿using ATCB.Library.Helpers;
-using ATCB.Library.Models.Discord;
+using ATCB.Library.Models.DiscordApp;
 using ATCB.Library.Models.Settings;
 using Discord;
 using System;

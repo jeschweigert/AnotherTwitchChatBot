@@ -7,21 +7,24 @@ using Discord.WebSocket;
 using Discord;
 using ATCB.Library.Helpers;
 using ATCB.Library.Models.WebApi;
+using ATCB.Library.Models.Settings;
 
-namespace ATCB.Library.Models.Discord
+namespace ATCB.Library.Models.DiscordApp
 {
     public class DiscordChatBot
     {
         private DiscordSocketClient discordClient;
         private string token, accessToken, refreshToken, guildId;
         private SocketGuild guild;
+        private ApplicationSettings settings;
 
-        public DiscordChatBot(DiscordDetails details)
+        public DiscordChatBot(DiscordDetails details, ApplicationSettings settings)
         {
             token = details.Token;
             accessToken = details.AccessToken;
             refreshToken = details.RefreshToken;
             guildId = details.GuildId;
+            this.settings = settings;
             discordClient = new DiscordSocketClient();
             discordClient.Connected += OnConnected;
         }
@@ -34,9 +37,24 @@ namespace ATCB.Library.Models.Discord
             await discordClient.StartAsync();
         }
 
-        public async Task SendMessageAsync(SocketChannel channel, string message)
+        public void SendMessage(string message, Embed embed = null)
         {
-            throw new NotImplementedException();
+            var channel = guild.GetTextChannel(settings.DiscordChannel);
+            if (channel != null)
+            {
+                ConsoleHelper.WriteLine($"[Discord] #{channel.Name} - {discordClient.CurrentUser.Username}: {message}");
+                channel.SendMessageAsync(message, embed: embed);
+            }
+        }
+
+        public List<SocketTextChannel> GetChannels()
+        {
+            return guild.TextChannels.ToList();
+        }
+
+        public SocketTextChannel GetChannel(ulong id)
+        {
+            return guild.GetTextChannel(id);
         }
 
         private Task OnConnected()

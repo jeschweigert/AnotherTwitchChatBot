@@ -20,7 +20,8 @@ using TwitchLib.Events.Services.FollowerService;
 using TwitchLib.Events.Services.LiveStreamMonitor;
 using ATCB.Library.Models.Misc;
 using ATCB.Library.Models.Settings;
-using ATCB.Library.Models.Discord;
+using ATCB.Library.Models.DiscordApp;
+using Discord;
 using Discord.Net;
 
 namespace ATCB.Library.Models.Twitch
@@ -90,11 +91,11 @@ namespace ATCB.Library.Models.Twitch
             followerService = new FollowerService(twitchApi);
             liveStreamMonitor = new LiveStreamMonitor(twitchApi);
             commandFactory = new CommandFactory();
-            discord = new DiscordChatBot(authDetails.DiscordDetails);
+            discord = new DiscordChatBot(authDetails.DiscordDetails, settings);
             speechSynthesizer = new SpeechSynthesizer();
 
             // Connect to Discord
-            if (settings.Discord)
+            if (settings.DiscordSetup)
             {
                 try
                 {
@@ -226,6 +227,26 @@ namespace ATCB.Library.Models.Twitch
         {
             IsLive = true;
             ConsoleHelper.WriteLine($"ONLINE: {e.Channel} has gone live!");
+
+            if (discord.GetConnectionState() == ConnectionState.Connected)
+            {
+                var builder = new EmbedBuilder()
+                    .WithTitle(e.Stream.Channel.Status)
+                    .WithUrl(e.Stream.Channel.Url)
+                    .WithColor(new Discord.Color(0x6441A4))
+                    .WithImageUrl(e.Stream.Preview.Large)
+                    .WithAuthor(author => {
+                        author
+                            .WithName(e.Stream.Channel.DisplayName)
+                            .WithUrl(e.Stream.Channel.Url)
+                            .WithIconUrl(e.Stream.Channel.Logo);
+                        })
+                    .AddInlineField("Game", e.Stream.Channel.Game)
+                    .AddInlineField("Viewers", e.Stream.Viewers);
+
+                var embed = builder.Build();
+                discord.SendMessage($"@everyone {e.Stream.Channel.DisplayName} just went live!", embed);
+            }
         }
 
         private void OnStreamOffline(object sender, OnStreamOfflineArgs e)
@@ -245,7 +266,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnUserConnectionError(object sender, OnConnectionErrorArgs e)
         {
-            ConsoleHelper.WriteLine($"[ERROR] USER CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
+            ConsoleHelper.WriteLine($"[ERROR] USER CONNECTION WITH TWITCH HAS BEEN LOST.", System.Drawing.Color.Red);
         }
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
@@ -270,7 +291,7 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnBotConnectionError(object sender, OnConnectionErrorArgs e)
         {
-            ConsoleHelper.WriteLine($"[ERROR] BOT CONNECTION WITH TWITCH HAS BEEN LOST.", Color.Red);
+            ConsoleHelper.WriteLine($"[ERROR] BOT CONNECTION WITH TWITCH HAS BEEN LOST.", System.Drawing.Color.Red);
         }
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
