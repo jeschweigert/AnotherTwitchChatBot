@@ -89,7 +89,7 @@ namespace ATCB.Library.Models.Twitch
             userClient = new TwitchClient(new ConnectionCredentials(Username, userAccessToken), Username);
             botClient = new TwitchClient(new ConnectionCredentials(Botname, botAccessToken), Username);
             followerService = new FollowerService(twitchApi);
-            liveStreamMonitor = new LiveStreamMonitor(twitchApi);
+            liveStreamMonitor = new LiveStreamMonitor(twitchApi, invokeEventsOnStart: true);
             commandFactory = new CommandFactory();
             discord = new DiscordChatBot(authDetails.DiscordDetails, settings);
             speechSynthesizer = new SpeechSynthesizer();
@@ -134,8 +134,12 @@ namespace ATCB.Library.Models.Twitch
             botClient.OnGiftedSubscription += OnGiftSubscriber;
 
             // Set up TwitchLib services
+            var streams = new List<string>();
+            streams.Add(Username);
+            if (Settings.TwitchFriends != null)
+                streams.AddRange(Settings.TwitchFriends);
+            liveStreamMonitor.SetStreamsByUsername(streams);
             followerService.SetChannelByName(Username);
-            liveStreamMonitor.SetStreamsByUsername(new List<string>(new[] { Username }));
         }
 
         /// <summary>
@@ -204,6 +208,17 @@ namespace ATCB.Library.Models.Twitch
             }
         }
 
+        public void RefreshLiveStreamMonitor()
+        {
+            liveStreamMonitor.StopService();
+            var streams = new List<string>();
+            streams.Add(Username);
+            if (Settings.TwitchFriends != null)
+                streams.AddRange(Settings.TwitchFriends);
+            liveStreamMonitor.SetStreamsByUsername(streams);
+            liveStreamMonitor.StartService();
+        }
+
         /// <summary>
         /// Sends a message through the chat bot.
         /// </summary>
@@ -228,8 +243,9 @@ namespace ATCB.Library.Models.Twitch
             IsLive = true;
             ConsoleHelper.WriteLine($"ONLINE: {e.Channel} has gone live!");
 
-            if (discord.GetConnectionState() == ConnectionState.Connected)
+            if (Settings.DiscordSetup)
             {
+                var game = string.IsNullOrEmpty(e.Stream.Channel.Game) ? "N/A" : e.Stream.Channel.Game;
                 var builder = new EmbedBuilder()
                     .WithTitle(e.Stream.Channel.Status)
                     .WithUrl(e.Stream.Channel.Url)
@@ -241,11 +257,12 @@ namespace ATCB.Library.Models.Twitch
                             .WithUrl(e.Stream.Channel.Url)
                             .WithIconUrl(e.Stream.Channel.Logo);
                         })
-                    .AddInlineField("Game", e.Stream.Channel.Game)
+                    .AddInlineField("Game", game)
                     .AddInlineField("Viewers", e.Stream.Viewers);
 
                 var embed = builder.Build();
-                discord.SendMessage($"@everyone {e.Stream.Channel.DisplayName} just went live!", embed);
+                var notify = (e.Channel.ToLower() == Username.ToLower()) ? "@everyone " : "";
+                discord.SendMessage($"{notify + e.Stream.Channel.DisplayName} just went live!", embed);
             }
         }
 

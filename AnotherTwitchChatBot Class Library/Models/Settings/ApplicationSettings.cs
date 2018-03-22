@@ -16,6 +16,8 @@ namespace ATCB.Library.Models.Settings
         {
             AppState = new Guid();
             PlaylistLocation = null;
+            DiscordChannel = 0;
+            TwitchFriends = new List<string>();
         }
 
         public Guid AppState { get; set; }
@@ -29,6 +31,8 @@ namespace ATCB.Library.Models.Settings
         public bool DiscordSetup { get; set; }
 
         public ulong DiscordChannel { get; set; }
+
+        public List<string> TwitchFriends { get; set; }
 
         public ApplicationSettings Load()
         {
