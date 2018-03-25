@@ -222,7 +222,7 @@
     <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="Helpers\TimeSpanHelper.cs" />
     <Compile Include="Models\Commands\CommandContext.cs" />
-    <Compile Include="Models\Commands\DiscordCommand.cs" />
+    <Compile Include="Models\Commands\Discord\DiscordCommand.cs" />
     <Compile Include="Models\Commands\Misc\8BallCommand.cs" />
     <Compile Include="Models\Commands\Command.cs" />
     <Compile Include="Models\Commands\CommandFactory.cs" />

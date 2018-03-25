@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 
-namespace ATCB.Library.Models.Commands
+namespace ATCB.Library.Models.Commands.Discord
 {
     public class DiscordCommand : Command
     {
@@ -26,7 +26,24 @@ namespace ATCB.Library.Models.Commands
                             if (channel != null)
                             {
                                 context.SendMessage($"Made {channel.Name} the default Discord text channel.");
-                                context.Settings.DiscordChannel = channel.Id;
+                                context.Settings.Discord.GeneralTextChannel = channel.Id;
+                                context.Settings.Save();
+                            }
+                            else
+                            {
+                                context.SendMessage($"Couldn't find a text channel by the name of \"{context.ArgumentsAsList[2]}\", please check your spelling.");
+                            }
+                        }
+                    }
+                    else if (context.ArgumentsAsList[0] == "friendalerts" && context.ChatMessage.IsChatBot)
+                    {
+                        if (context.ArgumentsAsList[1] == "set")
+                        {
+                            var channel = context.DiscordClient.GetChannels().Where(x => x.Name == context.ArgumentsAsList[2]).FirstOrDefault();
+                            if (channel != null)
+                            {
+                                context.SendMessage($"Made {channel.Name} the Discord text channel for friend alerts.");
+                                context.Settings.Discord.GeneralTextChannel = channel.Id;
                                 context.Settings.Save();
                             }
                             else
@@ -40,7 +57,7 @@ namespace ATCB.Library.Models.Commands
                 {
                     if (context.ArgumentsAsList[0] == "setup" && context.ChatMessage.IsChatBot)
                     {
-                        if (!context.Settings.DiscordSetup)
+                        if (!context.Settings.Discord.IsSetup)
                         {
                             ConsoleHelper.WriteLine("Opening up the Discord authentication page, follow the instructions when given a success message.");
                             System.Diagnostics.Process.Start($"{discordOAuth}&state={context.Settings.AppState.ToString()}");

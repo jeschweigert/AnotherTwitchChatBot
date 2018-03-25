@@ -95,7 +95,12 @@ namespace ATCB.Library.Models.Twitch
             speechSynthesizer = new SpeechSynthesizer();
 
             // Connect to Discord
-            if (settings.DiscordSetup)
+            if (authDetails.DiscordDetails.GuildId != "0" && settings.Discord.IsSetup == false)
+            {
+                settings.Discord.IsSetup = true;
+                settings.Save();
+            }
+            if (settings.Discord.IsSetup)
             {
                 try
                 {
@@ -240,35 +245,46 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnStreamOnline(object sender, OnStreamOnlineArgs e)
         {
-            IsLive = true;
+            var notify = "@everyone ";
+            var channel = Settings.Discord.TwitchLiveAnnounceTextChannel;
+            if (e.Channel.ToLower() == Username.ToLower())
+                IsLive = true;
+            else
+            {
+                notify = "";
+                channel = Settings.Discord.TwitchFriendLiveAnnounceTextChannel;
+            }
             ConsoleHelper.WriteLine($"ONLINE: {e.Channel} has gone live!");
 
-            if (Settings.DiscordSetup)
+            if (Settings.Discord.IsSetup)
             {
+                var bio = twitchApi.Users.helix.GetUsersAsync(new List<string>() { e.ChannelId }).GetAwaiter().GetResult().Users.First()?.Description;
+                bio = (bio == null) ? "N/A" : bio;
                 var game = string.IsNullOrEmpty(e.Stream.Channel.Game) ? "N/A" : e.Stream.Channel.Game;
                 var builder = new EmbedBuilder()
                     .WithTitle(e.Stream.Channel.Status)
                     .WithUrl(e.Stream.Channel.Url)
                     .WithColor(new Discord.Color(0x6441A4))
-                    .WithImageUrl(e.Stream.Preview.Large)
+                    .WithImageUrl($"{e.Stream.Preview.Medium}?stamp={DateTime.Now.Ticks}")
                     .WithAuthor(author => {
                         author
                             .WithName(e.Stream.Channel.DisplayName)
                             .WithUrl(e.Stream.Channel.Url)
                             .WithIconUrl(e.Stream.Channel.Logo);
                         })
+                    .AddField("Bio", bio)
                     .AddInlineField("Game", game)
                     .AddInlineField("Viewers", e.Stream.Viewers);
 
                 var embed = builder.Build();
-                var notify = (e.Channel.ToLower() == Username.ToLower()) ? "@everyone " : "";
-                discord.SendMessage($"{notify + e.Stream.Channel.DisplayName} just went live!", embed);
+                discord.SendMessage($"{notify + e.Stream.Channel.DisplayName} just went live!", channel, embed);
             }
         }
 
         private void OnStreamOffline(object sender, OnStreamOfflineArgs e)
         {
-            IsLive = false;
+            if (e.Channel.ToLower() == Username.ToLower())
+                IsLive = false;
             ConsoleHelper.WriteLine($"OFFLINE: {e.Channel} has stopped streaming.");
         }
 

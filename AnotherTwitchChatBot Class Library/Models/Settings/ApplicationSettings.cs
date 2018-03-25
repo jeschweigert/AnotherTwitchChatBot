@@ -16,7 +16,8 @@ namespace ATCB.Library.Models.Settings
         {
             AppState = new Guid();
             PlaylistLocation = null;
-            DiscordChannel = 0;
+            Discord = new DiscordSettings();
+            Discord.IsSetup = false;
             TwitchFriends = new List<string>();
         }
 
@@ -28,9 +29,7 @@ namespace ATCB.Library.Models.Settings
 
         public bool SoundEffects { get; internal set; }
 
-        public bool DiscordSetup { get; set; }
-
-        public ulong DiscordChannel { get; set; }
+        public DiscordSettings Discord { get; set; }
 
         public List<string> TwitchFriends { get; set; }
 
@@ -49,5 +48,16 @@ namespace ATCB.Library.Models.Settings
         {
             return File.Exists(Location);
         }
+    }
+
+    public class DiscordSettings
+    {
+        public bool IsSetup { get; set; }
+
+        public ulong GeneralTextChannel { get; set; }
+
+        public ulong TwitchLiveAnnounceTextChannel { get; set; }
+
+        public ulong TwitchFriendLiveAnnounceTextChannel { get; set; }
     }
 }

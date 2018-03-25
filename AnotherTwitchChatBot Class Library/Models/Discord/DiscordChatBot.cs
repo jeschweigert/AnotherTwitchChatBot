@@ -37,9 +37,10 @@ namespace ATCB.Library.Models.DiscordApp
             await discordClient.StartAsync();
         }
 
-        public void SendMessage(string message, Embed embed = null)
+        public void SendMessage(string message, ulong channelId = 0, Embed embed = null)
         {
-            var channel = guild.GetTextChannel(settings.DiscordChannel);
+            ulong id = (channelId != 0) ? channelId : settings.Discord.GeneralTextChannel;
+            var channel = guild.GetTextChannel(id);
             if (channel != null)
             {
                 ConsoleHelper.WriteLine($"[Discord] #{channel.Name} - {discordClient.CurrentUser.Username}: {message}");
