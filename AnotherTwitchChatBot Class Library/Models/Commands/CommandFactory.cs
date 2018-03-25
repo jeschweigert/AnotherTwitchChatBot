@@ -40,6 +40,7 @@ namespace ATCB.Library.Models.Commands
                 ConsoleHelper.WriteLine($"Added {pluginCount} plugin(s).");
             }
 
+            // Get all commands from this project
             var commandsEnum = ReflectiveEnumerator.GetEnumerableOfType<Command>();
             foreach (Command c in commandsEnum)
             {

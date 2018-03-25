@@ -256,6 +256,8 @@
     <Compile Include="Models\Music\RequestedSong.cs" />
     <Compile Include="Models\Music\SongChangeEventArgs.cs" />
     <Compile Include="Models\Music\SongEnumerator.cs" />
+    <Compile Include="Models\Plugins\EventServiceHandler.cs" />
+    <Compile Include="Models\Plugins\EventsService.cs" />
     <Compile Include="Models\Settings\ApplicationSettings.cs" />
     <Compile Include="Models\Twitch\TwitchChatBot.cs" />
     <Compile Include="Models\WebApi\AuthenticationDetails.cs" />

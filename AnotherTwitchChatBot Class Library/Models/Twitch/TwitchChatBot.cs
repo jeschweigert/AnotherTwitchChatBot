@@ -23,6 +23,7 @@ using ATCB.Library.Models.Settings;
 using ATCB.Library.Models.DiscordApp;
 using Discord;
 using Discord.Net;
+using ATCB.Library.Models.Plugins;
 
 namespace ATCB.Library.Models.Twitch
 {
@@ -41,6 +42,7 @@ namespace ATCB.Library.Models.Twitch
         private WebAuthenticator authenticator;
         
         private CommandFactory commandFactory;
+        private EventServiceHandler eventsServices;
         private DiscordChatBot discord;
 
         private Guid appState;
@@ -91,6 +93,7 @@ namespace ATCB.Library.Models.Twitch
             followerService = new FollowerService(twitchApi);
             liveStreamMonitor = new LiveStreamMonitor(twitchApi, invokeEventsOnStart: true);
             commandFactory = new CommandFactory();
+            eventsServices = new EventServiceHandler(followerService, userClient, botClient);
             discord = new DiscordChatBot(authDetails.DiscordDetails, settings);
             speechSynthesizer = new SpeechSynthesizer();
 
