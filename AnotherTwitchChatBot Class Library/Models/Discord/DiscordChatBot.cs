@@ -27,6 +27,7 @@ namespace ATCB.Library.Models.DiscordApp
             this.settings = settings;
             discordClient = new DiscordSocketClient();
             discordClient.Connected += OnConnected;
+            discordClient.Disconnected += OnDisconnected;
         }
 
         public ConnectionState GetConnectionState() => discordClient.ConnectionState;
@@ -62,6 +63,12 @@ namespace ATCB.Library.Models.DiscordApp
         {
             ConsoleHelper.WriteLine("Discord bot connected!");
             guild = discordClient.GetGuild(ulong.Parse(guildId));
+            return Task.CompletedTask;
+        }
+
+        private Task OnDisconnected(Exception arg)
+        {
+            ConsoleHelper.WriteLine("Discord bot disconnected.");
             return Task.CompletedTask;
         }
     }

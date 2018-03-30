@@ -11,16 +11,15 @@ namespace ATCB.Library.Models.Commands.Music
 {
     public class VolumeCommand : Command
     {
+        public VolumeCommand()
+        {
+            MustBeThisTallToRide = Models.Twitch.UserType.Chat_Bot;
+        }
+
         public override string[] Synonyms() { return new string[] { "volume" }; }
 
         public override void Run(CommandContext context)
         {
-            if (!context.ChatMessage.IsChatBot)
-            {
-                context.SendMessage("The !volume command can only be used from within the console itself.");
-                return;
-            }
-
             if (context.ArgumentsAsList.Count > 0)
             {
                 var success = double.TryParse(context.ArgumentsAsList[0], out double newVolume);

@@ -29,6 +29,8 @@ namespace ATCB.Library.Models.Settings
 
         public bool SoundEffects { get; internal set; }
 
+        public bool SpokenAlerts { get; internal set; }
+
         public DiscordSettings Discord { get; set; }
 
         public List<string> TwitchFriends { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATCB.Library.Models.Twitch;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ namespace ATCB.Library.Models.Commands
     public abstract class Command
     {
         public bool ContainsSeveralCommands = false;
+
+        public UserType MustBeThisTallToRide = UserType.Default;
 
         public abstract string[] Synonyms();
 

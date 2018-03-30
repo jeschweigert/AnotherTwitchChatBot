@@ -207,8 +207,8 @@ namespace ATCB.Library.Models.Twitch
             Command command = commandFactory.GetCommand(commandText);
             if (command != null)
             {
-                var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, UserType.Broadcaster, consoleCommand));
-                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, commandFactory, Settings, discord, true)); }).Start();
+                var context = new ChatCommand(Botname, new ChatMessage(null, Username, null, Botname, null, true, true, TwitchLib.Enums.UserType.Broadcaster, consoleCommand));
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, context, UserType.Chat_Bot, commandFactory, Settings, discord, true)); }).Start();
             }
             else
             {
@@ -235,13 +235,36 @@ namespace ATCB.Library.Models.Twitch
             botClient.SendMessage(message);
         }
 
+        public UserType DetermineUserType(TwitchLib.Enums.UserType userType, bool isSubscribed = false, bool isConsole = false)
+        {
+            UserType type = UserType.Default;
+            if (isConsole)
+                type = UserType.Chat_Bot;
+            switch (userType)
+            {
+                case TwitchLib.Enums.UserType.Broadcaster:
+                    type = UserType.Broadcaster;
+                    break;
+                case TwitchLib.Enums.UserType.Moderator:
+                    type = UserType.Moderator;
+                    break;
+                default:
+                    type = UserType.Default;
+                    break;
+            }
+            if (isSubscribed && type == UserType.Default)
+                type = UserType.Subscriber;
+            return type;
+        }
+
         #region Service Events
         
         private void OnNewFollowersDetected(object sender, OnNewFollowersDetectedArgs e)
         {
             foreach (var follow in e.NewFollowers)
             {
-                speechSynthesizer.SpeakAsync($"Thanks to {follow.User.DisplayName} for following!");
+                if (Settings.SpokenAlerts)
+                    speechSynthesizer.SpeakAsync($"Thanks to {follow.User.DisplayName} for following!");
                 botClient.SendMessage($"Thanks to {follow.User.DisplayName} for following!");
             }
         }
@@ -307,7 +330,8 @@ namespace ATCB.Library.Models.Twitch
 
         private void OnUserBeingHosted(object sender, OnBeingHostedArgs e)
         {
-            speechSynthesizer.SpeakAsync($"{e.HostedByChannel} began hosting you for {e.Viewers} viewers!");
+            if (Settings.SpokenAlerts)
+                speechSynthesizer.SpeakAsync($"{e.HostedByChannel} began hosting you for {e.Viewers} viewers!");
             botClient.SendMessage($"Thanks for the host, @{e.HostedByChannel}!");
         }
 
@@ -339,7 +363,7 @@ namespace ATCB.Library.Models.Twitch
                 badges += "[S] ";
             ConsoleHelper.WriteLineChat($"{badges}{e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
 
-            if (e.ChatMessage.Bits > 0)
+            if (e.ChatMessage.Bits > 0 && Settings.SpokenAlerts)
                 speechSynthesizer.SpeakAsync($"Thanks to {e.ChatMessage.DisplayName} for cheering {e.ChatMessage.Bits} bits!");
         }
 
@@ -364,16 +388,20 @@ namespace ATCB.Library.Models.Twitch
             switch (e.Subscriber.SubscriptionPlan)
             {
                 case SubscriptionPlan.Prime:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing via Twitch Prime!");
+                    if (Settings.SpokenAlerts)
+                        speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing via Twitch Prime!");
                     break;
                 case SubscriptionPlan.Tier2:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for their tier 2 subscription!");
+                    if (Settings.SpokenAlerts)
+                        speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for their tier 2 subscription!");
                     break;
                 case SubscriptionPlan.Tier3:
-                    speechSynthesizer.SpeakAsync($"Eternal gratitude to {e.Subscriber.DisplayName} for their tier 3 subscription!");
+                    if (Settings.SpokenAlerts)
+                        speechSynthesizer.SpeakAsync($"Eternal gratitude to {e.Subscriber.DisplayName} for their tier 3 subscription!");
                     break;
                 default:
-                    speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing!");
+                    if (Settings.SpokenAlerts)
+                        speechSynthesizer.SpeakAsync($"Much thanks to {e.Subscriber.DisplayName} for subscribing!");
                     break;
             }
         }
@@ -381,23 +409,28 @@ namespace ATCB.Library.Models.Twitch
         private void OnReSubscriber(object sender, OnReSubscriberArgs e)
         {
             ConsoleHelper.WriteLine($"{e.ReSubscriber.DisplayName} just re-subscribed for {e.ReSubscriber.Months} months!");
-            speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
-            speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
+            if (Settings.SpokenAlerts)
+            {
+                speechSynthesizer.SpeakAsync($"Much thanks to {e.ReSubscriber.DisplayName} for re-subscribing for {e.ReSubscriber.Months} months!");
+                speechSynthesizer.SpeakAsync(e.ReSubscriber.ResubMessage);
+            }
         }
 
         private void OnGiftSubscriber(object sender, OnGiftedSubscriptionArgs e)
         {
             ConsoleHelper.WriteLine($"{e.GiftedSubscription.DisplayName} just bought {e.GiftedSubscription.MsgParamRecipientDisplayName} a {e.GiftedSubscription.MsgParamSubPlan} subscription!");
-            speechSynthesizer.SpeakAsync($"Much thanks to {e.GiftedSubscription.DisplayName} for buying {e.GiftedSubscription.MsgParamRecipientDisplayName} a sub!");
+            if (Settings.SpokenAlerts)
+                speechSynthesizer.SpeakAsync($"Much thanks to {e.GiftedSubscription.DisplayName} for buying {e.GiftedSubscription.MsgParamRecipientDisplayName} a sub!");
         }
 
         private void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
             var commandText = e.Command.CommandText.ToLower();
+            var userType = DetermineUserType(e.Command.ChatMessage.UserType, e.Command.ChatMessage.IsSubscriber);
             Command command = commandFactory.GetCommand(commandText);
-            if (command != null)
+            if (command != null && command.MustBeThisTallToRide <= userType)
             {
-                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command, commandFactory, Settings, discord)); }).Start();
+                new Task(() => { command.Run(new CommandContext(botClient, userClient, twitchApi, e.Command, DetermineUserType(e.Command.ChatMessage.UserType, e.Command.ChatMessage.IsSubscriber), commandFactory, Settings, discord)); }).Start();
             }
             else
             {
@@ -406,5 +439,14 @@ namespace ATCB.Library.Models.Twitch
         }
 
         #endregion
+    }
+
+    public enum UserType
+    {
+        Default,
+        Subscriber,
+        Moderator,
+        Broadcaster,
+        Chat_Bot
     }
 }

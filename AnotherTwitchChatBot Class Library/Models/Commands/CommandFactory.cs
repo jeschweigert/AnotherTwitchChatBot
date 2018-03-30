@@ -1,5 +1,6 @@
 ﻿using ATCB.Library.Helpers;
 using ATCB.Library.Models.Misc;
+using ATCB.Library.Models.Twitch;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -55,10 +56,10 @@ namespace ATCB.Library.Models.Commands
             return Commands.Where(x => x.Synonyms().Contains(commandName)).FirstOrDefault();
         }
 
-        public List<string> ToList()
+        public List<string> ToList(UserType type = UserType.Default)
         {
             List<string> commands = new List<string>();
-            foreach (var command in Commands)
+            foreach (var command in Commands.Where(x => x.MustBeThisTallToRide <= type))
             {
                 if (command.ContainsSeveralCommands)
                     commands.AddRange(command.Synonyms());

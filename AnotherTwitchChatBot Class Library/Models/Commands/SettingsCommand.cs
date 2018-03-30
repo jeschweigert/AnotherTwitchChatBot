@@ -8,15 +8,15 @@ namespace ATCB.Library.Models.Commands
 {
     public class SettingsCommand : Command
     {
+        public SettingsCommand()
+        {
+            MustBeThisTallToRide = Models.Twitch.UserType.Chat_Bot;
+        }
+
         public override string[] Synonyms() { return new string[] { "settings" }; }
 
         public override void Run(CommandContext context)
         {
-            if (!context.ChatMessage.IsChatBot)
-            {
-                context.SendMessage("The !settings command can only be used from within the console itself.");
-                return;
-            }
             if (context.ArgumentsAsList.Count > 2)
             {
                 if (context.ArgumentsAsList[0] == "friends")
@@ -78,6 +78,21 @@ namespace ATCB.Library.Models.Commands
                     {
                         context.SendMessage("Sound effects have been disabled.");
                         context.Settings.SoundEffects = false;
+                        context.Settings.Save();
+                    }
+                }
+                else if (context.ArgumentsAsList[0] == "spokenalerts")
+                {
+                    if (context.ArgumentsAsList[1] == "enable")
+                    {
+                        context.SendMessage("Spoken alerts have been enabled.");
+                        context.Settings.SpokenAlerts = true;
+                        context.Settings.Save();
+                    }
+                    else if (context.ArgumentsAsList[1] == "disable")
+                    {
+                        context.SendMessage("Spoken alerts have been disabled.");
+                        context.Settings.SpokenAlerts = false;
                         context.Settings.Save();
                     }
                 }

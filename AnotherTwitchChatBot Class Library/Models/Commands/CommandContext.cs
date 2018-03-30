@@ -1,6 +1,7 @@
 ﻿using ATCB.Library.Helpers;
 using ATCB.Library.Models.DiscordApp;
 using ATCB.Library.Models.Settings;
+using ATCB.Library.Models.Twitch;
 using Discord;
 using System;
 using System.Collections;
@@ -27,7 +28,7 @@ namespace ATCB.Library.Models.Commands
         public ApplicationSettings Settings;
         public List<string> Commands { get; private set; }
 
-        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, CommandFactory factory, ApplicationSettings settings, DiscordChatBot discord, bool fromConsole = false)
+        public CommandContext(TwitchClient botClient, TwitchClient userClient, TwitchAPI twitchApi, ChatCommand context, UserType type, CommandFactory factory, ApplicationSettings settings, DiscordChatBot discord, bool fromConsole = false)
         {
             BotClient = botClient;
             UserClient = userClient;
@@ -36,11 +37,10 @@ namespace ATCB.Library.Models.Commands
             Settings = settings;
             DiscordClient = discord;
             FromConsole = fromConsole;
-
-            Commands = factory.ToList();
             
             // Provide information to the ChatMessageContext
             ChatMessage = new ChatMessageContext();
+            ChatMessage.UserType = type;
             if (context != null)
             {
                 ChatMessage.Bits = context.ChatMessage.Bits;
@@ -52,6 +52,8 @@ namespace ATCB.Library.Models.Commands
                 ChatMessage.IsSubscriber = context.ChatMessage.IsSubscriber;
                 ChatMessage.Message = context.ChatMessage.Message;
             }
+
+            Commands = factory.ToList(type);
 
             // Provide information to the TwitchStreamContext
             TwitchStream = new TwitchStreamContext();
@@ -96,6 +98,7 @@ namespace ATCB.Library.Models.Commands
             public bool IsModeratorOrBroadcaster { get; set; }
             public bool IsSubscriber { get; set; }
             public string Message { get; set; }
+            public UserType UserType { get; set; }
         }
 
         public class TwitchStreamContext
