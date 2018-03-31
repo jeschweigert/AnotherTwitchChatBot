@@ -357,10 +357,37 @@ namespace ATCB.Library.Models.Twitch
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             var badges = "";
-            if (e.ChatMessage.IsModerator)
-                badges += "[M] ";
-            if (e.ChatMessage.IsSubscriber)
-                badges += "[S] ";
+            foreach (var badge in e.ChatMessage.Badges)
+            {
+                switch (badge.Key)
+                {
+                    case "admin":
+                        badges += "[A] ";
+                        break;
+                    case "broadcaster":
+                        badges += "[B] ";
+                        break;
+                    case "global_mod":
+                        badges += "[GM] ";
+                        break;
+                    case "staff":
+                        badges += "[STAFF] ";
+                        break;
+                    case "moderator":
+                        badges += "[M] ";
+                        break;
+                    case "subscriber":
+                        badges += "[S] ";
+                        break;
+                    case "turbo":
+                        badges += "[T] ";
+                        break;
+                    default:
+                        badges += $"[{badge.Key}] ";
+                        break;
+                }
+            }
+
             ConsoleHelper.WriteLineChat($"{badges}{e.ChatMessage.DisplayName}: {e.ChatMessage.Message}");
 
             if (e.ChatMessage.Bits > 0 && Settings.SpokenAlerts)

@@ -16,7 +16,10 @@ namespace ATCB.Library.Models.Commands.Twitch
             using (WebClient client = new WebClient())
             {
                 var time = client.DownloadString($"https://decapi.me/twitch/uptime/{context.TwitchStream.Username}");
-                context.SendMessage(time);
+                if (time.Contains("offline"))
+                    context.SendMessage($"{time}.");
+                else
+                    context.SendMessage($"{context.TwitchStream.Username} has been live for {time}.");
             }
         }
     }

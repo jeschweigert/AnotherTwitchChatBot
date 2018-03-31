@@ -239,6 +239,7 @@
     <Compile Include="Models\Commands\Music\SkipCommand.cs" />
     <Compile Include="Models\Commands\Music\SongRequestCommand.cs" />
     <Compile Include="Models\Commands\SettingsCommand.cs" />
+    <Compile Include="Models\Commands\Twitch\FollowCommand.cs" />
     <Compile Include="Models\Commands\Twitch\GameCommand.cs" />
     <Compile Include="Models\Commands\Twitch\UptimeCommand.cs" />
     <Compile Include="Models\Discord\DiscordChatBot.cs" />
